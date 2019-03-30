@@ -3,11 +3,38 @@ import java.io.*;
 import java.util.*;
 
 public class P2P_Client {
-    public static void main(String[] args){
+    private static final int NUM_DHT_SERVERS = 4;
 
+    public static void main(String[] args) throws IOException {
+        String key = "kimi no na wa";
+        int hashedKey = hashKey(key);
+        System.out.println(hashedKey);
+
+        sendToDHT();
     }
 
-    //TODO hashFunction to find DHT ID
+    public static void sendToDHT() throws IOException { //UDP Client --> Server
+        DatagramSocket clientSocket = new DatagramSocket();
+
+        byte[] sendData = new byte[4096];
+
+        String string = "test";
+
+        sendData = string.getBytes();
+
+        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getLoopbackAddress(), 25565);
+
+        clientSocket.send(sendPacket);
+    }
+
+    //hash function to determine DHT to send to
+    public static int hashKey(String content){
+        int ASCIISum = 0;
+        for(int i = 0; i < content.length(); i++){
+            ASCIISum += (int) content.charAt(i);
+        }
+        return (ASCIISum % NUM_DHT_SERVERS) + 1;
+    }
 
     //TODO init(IP address) -- find DHTs
 
@@ -18,6 +45,4 @@ public class P2P_Client {
     //TODO query_for_content(hashedContentWanted) -- send to DHT
 
     //TODO exit(DHT)
-
-
 }
