@@ -8,29 +8,30 @@ public class P2P_Client {
 	private static final int NOT_FOUND = 404;
 	private static final int HTTP_NOT_SUPPORTED = 505;
     private static final int NUM_DHT_SERVERS = 4;
+    private static String DHTOneIP;
+    private static int DHTOnePort;
+    private static DatagramSocket UDPSocket;
 
-    public static void main(String[] args) throws IOException {
-        String key = "fig3";
-        int hashedKey = hashKey(key);
-        System.out.println(hashedKey);
+    public static void main(String[] args) throws Exception {
+        //DHTOneIP = args[0];
+        //DHTOnePort=args[1];
+        init();
+        //String key = "fig3";
+        //int hashedKey = hashKey(key);
+        //System.out.println(hashedKey);
 
-        sendToDHT();
+        //sendToDHT();
     }
 
-    public static void sendToDHT() throws IOException { //UDP Client --> Server
-        DatagramSocket clientSocket = new DatagramSocket();
-
+    public static void sendToDHT(String message, String IP, int port) throws IOException { //UDP Client --> Server
         byte[] sendData = new byte[4096];
-        //byte[] ipAddr = new byte[]{135, 0, 211, 153};
-        InetAddress addr = InetAddress.getByName("192.168.2.1");
+        sendData = message.getBytes();
 
-        String string = "the newest way to slide in the DMs ;)";
+        InetAddress addr = InetAddress.getByName(IP);
 
-        sendData = string.getBytes();
+        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, addr, port);
 
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, addr, 25565);
-
-        clientSocket.send(sendPacket);
+        UDPSocket.send(sendPacket);
     }
 
     //hash function to determine DHT to send to
@@ -42,8 +43,21 @@ public class P2P_Client {
         return (ASCIISum % NUM_DHT_SERVERS) + 1;
     }
 
-    //TODO init(IP address) -- find DHTs
+    public static void init() throws Exception{
 
+        UDPSocket = new DatagramSocket();
+
+        sendToDHT("This is a test", "135.0.211.153", 25565);
+        String resp = receiveFromDHT();
+        System.out.println(resp);
+    }
+
+    public static String receiveFromDHT() throws Exception{
+        byte[] receiveData = new byte[4096];
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        UDPSocket.receive(receivePacket);
+        return new String(receivePacket.getData());
+    }
     //TODO int DHTToContact <-- hashContent() for use to insert and retrieve
 
     //TODO inform_and_update(hashedContentToStore, ownIPAddress) -- send to DHT
