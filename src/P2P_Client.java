@@ -22,7 +22,7 @@ public class P2P_Client {
 
         byte[] sendData = new byte[4096];
         //byte[] ipAddr = new byte[]{135, 0, 211, 153};
-        InetAddress addr = InetAddress.getByName("135.0.211.153");
+        InetAddress addr = InetAddress.getByName("192.168.2.1");
 
         String string = "the newest way to slide in the DMs ;)";
 
