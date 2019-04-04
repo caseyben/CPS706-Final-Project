@@ -37,10 +37,15 @@ public class P2P_Client {
                     String fileName = scanner.next();
                     File file = new File(fileName);
                     if(file.exists()){
-                        client.insert(fileName);
+                        try{
+                            client.insert(fileName);
+                        }
+                        catch(Exception e){
+                            System.out.println(e);
+                        }
                     }
-                    else(){
-                        System.out.println(e);
+                    else{
+                        System.out.println("File does not exist");
                     }
                 }
                 if(input.equalsIgnoreCase("help")){
