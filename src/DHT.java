@@ -17,8 +17,9 @@ public class DHT {
         //init();
         String key = "kimi no na wa";
         //System.out.println(hashKey(key));
+        startTCPServer("", "", 20069);
 
-        UDPServer(25565);
+        UDPServer(20069);
 
         //TCPServer(25565);
         //TCPServer(25566);
@@ -31,23 +32,23 @@ public class DHT {
         //TCPClient(25568);
     }
 
-    public static void UDPClient(String message, String IP, int port) throws IOException{
-        DatagramSocket UDP_ClientSocket = new DatagramSocket(25565);
+    public static void UDPClient(String message, String destIP, int destPort) throws IOException{
+        DatagramSocket UDP_ClientSocket = new DatagramSocket(destPort);
         //Prepare Message
         byte[] UDP_sendData = new byte[4096];
         UDP_sendData = message.getBytes();
 
-        InetAddress UDP_returnIPAddress_ = InetAddress.getByName(IP);
+        InetAddress UDP_returnIPAddress = InetAddress.getByName(destIP);
 
-        DatagramPacket sendPacket = new DatagramPacket(UDP_sendData, UDP_sendData.length, UDP_returnIPAddress_, port);
+        DatagramPacket sendPacket = new DatagramPacket(UDP_sendData, UDP_sendData.length, UDP_returnIPAddress, destPort);
 
         UDP_ClientSocket.send(sendPacket);
         UDP_ClientSocket.close();
-        UDPServer(25565);
+        UDPServer(20069);
     }
 
     public static void UDPServer(int port) throws IOException { //UDP from Client --> Server
-        DatagramSocket UDP_ServerSocket = new DatagramSocket(25565);
+        DatagramSocket UDP_ServerSocket = new DatagramSocket(port);
         System.out.println("UDP_Server on port: " + port);
 
         //Data Buffers
@@ -78,6 +79,12 @@ public class DHT {
             } else if (UDP_receiveArray[0].equals("INSERT")){
                 System.out.println("insert");
                 insert(UDP_receiveArray[1], UDP_returnAddress.getHostAddress());
+            } else if (UDP_receiveArray[0].equals("GET_IP")){
+                //TODO returnIP();
+                System.out.println("init");
+                UDP_ServerSocket.close();
+                UDPClient("192.168.2.1:1111_192.168.2.2:2222_192.168.2.3:3333", UDP_returnAddress.getHostAddress(), UDP_returnPort);
+                break;
             }
 
             //String UDP_returnString = "192.168.2.1:1111_192.168.2.2:2222_192.168.2.3:3333"; //string + " acknowledged from: " + returnAddress;
@@ -88,7 +95,7 @@ public class DHT {
         }
     }
 
-    public static void TCPClient(int port) throws IOException {
+    public static void TCPClient(String content, String IPAddress, int port) throws IOException {
         //Establish Socket
         Socket TCP_clientSocket = new Socket("127.0.0.1", port);
         System.out.println("TCP_Client on port: " + port);
@@ -103,12 +110,12 @@ public class DHT {
         System.out.println("Received from TCP_Server: " + TCP_fromServerText);
     }
 
-    public static void TCPServer(int port) throws IOException {
+    public static void TCPServer(String content, String IPAddress, int port) throws IOException {
         //Establish Socket
         ServerSocket TCP_serverSocket = new ServerSocket(port);
         System.out.println("TCP_Server on port: " + port);
 
-         while(true){
+         //while(true){
              //Establish Socket
              Socket TCP_serverConnectionSocket = TCP_serverSocket.accept();
 
@@ -119,7 +126,7 @@ public class DHT {
              //Out
              DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
              TCP_toClient.writeBytes(TCP_fromClientText + " ACK!" + '\n');
-         }
+         //}
     }
 
     //hash function to determine which DHT to store in
@@ -131,16 +138,11 @@ public class DHT {
         return (ASCIISum % NUM_DHT_SERVERS) + 1;
     }
 
-    public static void delimit(String UDP_receiveString){
-
-    }
-
+    /*Between DHT && P2P_Client*/
     public static void insert(String content, String IPAddress){ //P2P_Client inform_and_update()
         theTable.put(content, IPAddress);
     }
 
-    //TODO retreive(hash(K))
-        //TODO returnIP()
     public static void retreive(String content, String IPAddress, int port) throws IOException{ //P2P_Client query_for_content()
         if(theTable.containsKey(content)){
             UDPClient(theTable.get(content), IPAddress, port);
@@ -149,7 +151,6 @@ public class DHT {
         }
     }
 
-    //TODO remove(K, V)
     public static void remove(String content, String IPAddress){ //P2P_Client exit()
         if(theTable.containsKey(content)){
             theTable.remove(content);
@@ -158,7 +159,17 @@ public class DHT {
         }
     }
 
+    /*Between DHT && DHT*/
     //TODO return_DHT_IPs
+    public static void returnIP(){
+        //call TCP Client to send data
+
+    }
+
+    //TODO forward_table_entry
+    public static void forwardEntry(String content, String IPAddress){
+        //call TCP Client to send data
+    }
 
     //TODO Error checking
     public static void init(){
@@ -184,8 +195,27 @@ public class DHT {
         System.out.println("SUCCESSOR_IP: " + SUCCESSOR_IP);
     }
 
-    //TODO forward_table_entry
-    public static void forwardEntry(String content, String IPAddress){
-        //call TCP Client to send data
+    public static void startTCPServer(String content, String destIP, int destPort) {
+        class InitTCPServer implements Runnable {
+            String content;
+            String destIP;
+            int destPort;
+
+            InitTCPServer(String content, String destIP, int destPort) {
+                this.content = content;
+                this.destIP = destIP;
+                this.destPort = destPort;
+            }
+
+            public void run() {
+                try {
+                    TCPServer(content, destIP, destPort);
+                } catch (IOException e) {
+                    System.out.println("Incorrect String content, String destIP, or int destPort.");
+                }
+            }
+        }
+        Thread TCPServerThread = new Thread(new InitTCPServer(content, destIP, destPort));
+        TCPServerThread.start();
     }
 }

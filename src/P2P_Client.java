@@ -10,25 +10,20 @@ public class P2P_Client {
     private static final int NUM_DHT_SERVERS = 4;
 
     public static void main(String[] args) throws Exception {
-        //DHTPool.put("135.0.211.153", 25565); //arg0, arg1
-        //String key = "fig3";
-        //int hashedKey = hashKey(key);
-        //System.out.println(hashedKey);
         Thread thread = new Thread(runnable);
         thread.start();
-
     }
 
 	static Runnable runnable = new Runnable() {
         public void run(){
-            Client client = new Client("135.0.211.153", 25565);
+            Client client = new Client("10.17.237.19", 20069);
             Scanner scanner = new Scanner(System.in);
             String input;
             while(true){
                 System.out.print("Enter input: ");
                 input = scanner.next();
                 if(input.equalsIgnoreCase("query")){
-                    System.out.print("Enter file name:");
+                    System.out.print("Enter file name: ");
                     String file = scanner.next();
                     try{
                         client.query(file);
@@ -37,19 +32,24 @@ public class P2P_Client {
                         System.out.println(e);
                     }
                 }
-                if(input.equalsIgnoreCase("upload")){
-                    System.out.print("Enter file name:");
+                if(input.equalsIgnoreCase("insert")){
+                    System.out.print("Enter file name: ");
                     String fileName = scanner.next();
-                    try{
-                        File file = new File(fileName);
+                    File file = new File(fileName);
+                    if(file.exists()){
+                        try{
+                            client.insert(fileName);
+                        }
+                        catch(Exception e){
+                            System.out.println(e);
+                        }
                     }
-                    catch(Exception e){
-                        System.out.println("Could not find file.");
+                    else{
+                        System.out.println("File does not exist");
                     }
-                    
                 }
                 if(input.equalsIgnoreCase("help")){
-                    System.out.print("upload - upload a file\nquery - query for content\nexit - exit program\n");
+                    System.out.print("insert - insert a file\nquery - query for content\nexit - exit program\n");
                 }
                 if(input.equalsIgnoreCase("exit")){
                     try{
@@ -59,12 +59,14 @@ public class P2P_Client {
                         System.out.println(e);
                     }
                 }
+                System.out.println("-----------");
             }
         }
     };
     public static class Client{
         private static DatagramSocket UDPSocket;
         private static LinkedHashMap<String,Integer> DHTPool= new LinkedHashMap<String,Integer>();
+        private static ArrayList<String> localRecords = new ArrayList<String>();
 
         public Client(String IP, int port){
             DHTPool.put(IP, port);
@@ -99,11 +101,11 @@ public class P2P_Client {
 
         public void init() throws Exception{
             UDPSocket = new DatagramSocket();
-            sendToDHT("FIND~balls", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
+            sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
             String resp = receiveFromDHT();
-            System.out.println(resp);
-            //fillDHTPool(resp);
-            //System.out.println(DHTPool.toString());
+            //System.out.println(resp);
+            fillDHTPool(resp);
+            System.out.println(DHTPool.toString());
         }
 
         public static String receiveFromDHT() throws Exception{
@@ -123,19 +125,28 @@ public class P2P_Client {
 
         public void query(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[id].toString(), (int) DHTPool.values().toArray()[id]);
-            String resp = receiveFromDHT();
+            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
+            String resp = receiveFromDHT().trim();
             System.out.println(resp);
         }
-        //TODO int DHTToContact <-- hashContent() for use to insert and retrieve
 
-        //TODO inform_and_update(hashedContentToStore, ownIPAddress) -- send to DHT
+        public void insert(String file) throws Exception{
+            int id = hashKey(file);
+            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
 
-        //TODO query_for_content(hashedContentWanted) -- send to DHT
+            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());
+            System.out.println(localRecords.toString());
+            //String resp = receiveFromDHT().trim();
+            //System.out.println(resp);
+        }
 
         public void exit() throws Exception{
-            sendToDHT("EXIT", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//inform content
+            String records = "";
+            for(int i = 0;i<localRecords.size();i++){
+                records+=localRecords.get(i) + "~"; 
+            }
+            sendToDHT("EXIT~"+records, DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//inform content
             System.exit(0);
         }
     }
-}
+}   
