@@ -32,7 +32,7 @@ public class P2P_Client {
                         System.out.println(e);
                     }
                 }
-                if(input.equalsIgnoreCase("insert")){
+                else if(input.equalsIgnoreCase("insert")){
                     System.out.print("Enter file name: ");
                     String fileName = scanner.next();
                     File file = new File(fileName);
@@ -48,16 +48,19 @@ public class P2P_Client {
                         System.out.println("File does not exist");
                     }
                 }
-                if(input.equalsIgnoreCase("help")){
+                else if(input.equalsIgnoreCase("help")){
                     System.out.print("insert - insert a file\nquery - query for content\nexit - exit program\n");
                 }
-                if(input.equalsIgnoreCase("exit")){
+                else if(input.equalsIgnoreCase("exit")){
                     try{
                         client.exit();
                     }
                     catch(Exception e){
                         System.out.println(e);
                     }
+                }
+                else{
+                    System.out.println("Invalid input.");
                 }
                 System.out.println("-----------");
             }
