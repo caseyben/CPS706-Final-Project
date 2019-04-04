@@ -3,10 +3,14 @@ import java.io.*;
 import java.util.*;
 
 public class P2P_Client {
+    private static final int OK = 200;
+	private static final int BAD_REQUEST = 400;
+	private static final int NOT_FOUND = 404;
+	private static final int HTTP_NOT_SUPPORTED = 505;
     private static final int NUM_DHT_SERVERS = 4;
 
     public static void main(String[] args) throws IOException {
-        String key = "kimi no na wa";
+        String key = "fig3";
         int hashedKey = hashKey(key);
         System.out.println(hashedKey);
 
@@ -17,12 +21,14 @@ public class P2P_Client {
         DatagramSocket clientSocket = new DatagramSocket();
 
         byte[] sendData = new byte[4096];
+        //byte[] ipAddr = new byte[]{135, 0, 211, 153};
+        InetAddress addr = InetAddress.getByName("135.0.211.153");
 
-        String string = "test";
+        String string = "the newest way to slide in the DMs ;)";
 
         sendData = string.getBytes();
 
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getLoopbackAddress(), 25565);
+        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, addr, 25565);
 
         clientSocket.send(sendPacket);
     }
