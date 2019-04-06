@@ -65,7 +65,7 @@ public class P2P_Server{
 		Runnable activeThreadProcess = new Runnable(){
 			public void run(){
 				try{
-					String requestCode, filename, connection, fileLastModified, responseString;
+					String requestCode, filename, connection, responseString;
 					double fileLength;
 					Socket socket = activeSocket.accept();
 					DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -83,9 +83,7 @@ public class P2P_Server{
 						byteArray = new byte[(int)file.length()];
 						try{//Server Responds 200 OK
 							if(file.exists()){
-
-								fileLastModified = generateLastModified(file);
-								responseString = generateHTTPResponse(OK, connection, generateDate(), generateLastModified(file), (double)file.length());
+								responseString = generateHTTPResponse(OK, connection, generateDate(null), generateDate(file), (double)file.length());
 								byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 								FileInputStream fileInput = new FileInputStream(file);
 								byte[] fileByteArray = new byte[(int)file.length()];
@@ -98,11 +96,11 @@ public class P2P_Server{
 								System.arraycopy(fileByteArray, 0, combinedArray, byteArray.length, fileByteArray.length);
 
 							}else{//Server Responds 404 NOT_FOUND
-								responseString = generateHTTPResponse(NOT_FOUND, connection, generateDate(), "", 0);
+								responseString = generateHTTPResponse(NOT_FOUND, connection, generateDate(null), "", 0);
 								byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 							}//if
 						}catch(Exception e){//Server Responds 400 BAD_REQUEST
-							responseString = generateHTTPResponse(BAD_REQUEST, connection, generateDate(), "", 0);
+							responseString = generateHTTPResponse(BAD_REQUEST, connection, generateDate(null), "", 0);
 							byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 						}//try
 						DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
@@ -135,19 +133,17 @@ public class P2P_Server{
 			return message;
 		}//generateHTTP
 
-		public String generateDate() throws Exception{
-			Date date = new Date();
+		public String generateDate(File file) throws Exception{
+			Date date;
+			if(file != null){
+				date = new Date(file.lastModified());
+			}else{
+				date = new Date();
+			}
   			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
  			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 			return dateFormat.format(date) + " GMT";
 		}//generateDate
-
-		public String generateLastModified(File file) throws Exception{
-			Date date = new Date(file.lastModified());
-			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
-		  	dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		 	return dateFormat.format(date) + " GMT";
-		}//generateLastModified
 	}//activeClient
 
 }//P2P_Server
