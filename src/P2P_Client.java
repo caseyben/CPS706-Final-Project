@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+
 public class P2P_Client {
 
     // HTTP Code 200
@@ -18,6 +19,9 @@ public class P2P_Client {
 
     // The number of DHT servers
     private static final int NUM_DHT_SERVERS = 4;
+
+    // The assigned port number
+    private static final int port = 20440;
 
     // The IP of the initial DHT connection
     private static String initDHTIP;
@@ -178,6 +182,7 @@ public class P2P_Client {
             int id = hashKey(file);
             sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
             String resp = receiveFromDHT().trim();
+            P2PServerConnect(resp,file);
             System.out.println(resp);
         }
 
@@ -210,9 +215,9 @@ public class P2P_Client {
 
     ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
 
-    public void P2PServerConnect(String message){
+    public static void P2PServerConnect(String IP, String message){
         try{
-            Socket socket = new Socket(port);
+            Socket socket = new Socket(IP, port);
             DataInputStream input = new DataInputStream(socket.getInputStream());
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
