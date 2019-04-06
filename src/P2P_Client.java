@@ -9,6 +9,8 @@ public class P2P_Client {
 	private static final int HTTP_NOT_SUPPORTED = 505;
     private static final int NUM_DHT_SERVERS = 4;
 
+    private static final int port = 20440;
+
     public static void main(String[] args) throws Exception {
         Thread thread = new Thread(runnable);
         thread.start();
@@ -17,6 +19,7 @@ public class P2P_Client {
 	static Runnable runnable = new Runnable() {
         public void run(){
             Client client = new Client("10.17.237.19", 20069);
+            P2P_Server server = new P2P_Server();
             Scanner scanner = new Scanner(System.in);
             String input;
             while(true){
@@ -152,4 +155,118 @@ public class P2P_Client {
             System.exit(0);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
+
+    public void P2PServerConnect(String message){
+        try{
+            Socket socket = new Socket(port);
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+
+            output.writeUTF(message);
+
+            message = input.readUTF();
+            socket.close();
+        }catch(IOException e){
+            System.err.println("Cannot connect to server.");
+        }
+    }//P2PServerConnect
+
+    public void recieveFileFromServer(String fileName){
+        byte[] file= new byte[20000];
+        
+    }//recieveFile
+
+    public String recieveHTTP(Scanner scanner){
+        String http = "";
+        return http;
+    }//recieveHTTP
+
+    public String generateHTTP(String filename, String hostname, String connectionStatus){
+        String http = "";
+        http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + status + "\r\nAccept-language: en-us\r\n";
+        return http;
+    }//generateHTTP
 }   
+
+//HTTP Request
+
+//GET /filename.txt HTTP/1.1\r\n
+//Host: hostname\r\n
+//Connection: status\r\n
+//Accept-language: en-us\r\n
+
+//HTTP Response
+
+//HTTP/1.1 StatusCode\r\n
+//Connection: status\r\n
+//Date: currentDate\r\n
+//Last-Modified: last file modified\r\n
+//Content-Length: length\r\n
+//Content-Type: image/jpeg\r\n

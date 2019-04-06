@@ -75,6 +75,12 @@ public class P2P_Server{
 						filename = filename.substring(1);
 						File file = new File(filename);
 
+						try{
+							
+						}catch(IOException e){
+
+						}
+
 					}//if
 				}catch(IOException e){
 					System.err.println("Process Errored");
@@ -82,7 +88,7 @@ public class P2P_Server{
 			}//run
 		};//activeThreadProcess
 
-		public String generateHTTP(int statusCode, String connectionStatus, String date, String lastModifiedDate, int lengthOfFile){
+		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, int lengthOfFile){
 			String message = "";
 	
 			if(statusCode == OK){
