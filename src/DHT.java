@@ -40,7 +40,7 @@ public class DHT {
         //TCPServer(25567);
         //TCPServer(25568);
 
-        //TCPClient("", "", 25565);
+        TCPClient("", "", 25565);
         //TCPClient("", "", 25566);
         //TCPClient("", "", 25567);
         //TCPClient("", "", 25568);
@@ -118,19 +118,21 @@ public class DHT {
 
     public static void TCPClient(String content, String IPAddress, int port) throws IOException {
         //Establish Socket
-        Socket TCP_clientSocket = new Socket("0.0.0.0", SUCCESSOR_PORT); //TODO change to static IP
+        Socket TCP_clientSocket = new Socket("192.168.0.166", SUCCESSOR_PORT); //TODO change to DHT_SUCCESSOR_IP
         System.out.println("TCP_Client on port: " + SUCCESSOR_PORT);
 
         String[] TCP_sendArray = content.split("~");
-        //else if()
+
 
         //Out
         DataOutputStream TCP_toServer = new DataOutputStream(TCP_clientSocket.getOutputStream());
-        //TCP_toServer.writeBytes("This is TCP_client on port: " + port + " " + '\n');
+        TCP_toServer.writeBytes("This is TCP_client on port: " + port + " " + '\n');
 
         String toServerString = content + "$" + IPAddress + "$" + port;
 
         if(TCP_sendArray[0].equals("GET_IP")){
+            TCP_toServer.writeBytes(toServerString);
+        } else if(TCP_sendArray[0].equals("EXIT")){
             TCP_toServer.writeBytes(toServerString);
         }
 
@@ -144,7 +146,7 @@ public class DHT {
         //Establish Socket
         ServerSocket TCP_serverSocket = new ServerSocket(DHT_PORT);
         System.out.println("TCP_Server on port: " + DHT_PORT);
-        System.out.println(TCP_serverSocket.getInetAddress().getHostAddress());
+        //System.out.println(TCP_serverSocket.getInetAddress().getHostAddress());
 
          while(true){
              //Establish Socket
@@ -161,7 +163,7 @@ public class DHT {
 
              //Out
              DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
-             //TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
+             TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
              if(TCP_receiveMessageArray[0].equals("GET_IP")){
                  String[] IPArray = TCP_receiveMessageArray[1].split("\\?");
                  if(IPArray.length == 3){
@@ -170,12 +172,17 @@ public class DHT {
                      content += DHT_IP_Address + DHT_PORT + "?";
                      TCPClient(content, IPAddress, port);
                  }
-             } //else if()
+             } else if(TCP_receiveMessageArray[0].equals("EXIT")){
+                 if(TCP_receiveMessageArray.length == 1){
+                    System.out.println("Completed removing records for client at: " + IPAddress + ":" + port);
+                 } else {
+                     remove(TCP_receiveMessageArray[1], IPAddress, port);
+                 }
+             }
 
 
 
 
-             //TODO if(DATA = EXIT) { remove(); }
 
 
          }
@@ -204,7 +211,7 @@ public class DHT {
     }
 
     public static void remove(String content, String destIPAddress, int destPort) throws IOException { //P2P_Client exit()
-        String out = "EXIT~";
+        String out = "";
 
         //split into records, if exists, remove it
         ArrayList<String> records = new ArrayList<>(Arrays.asList(content.split("\\?"))); //split between records
@@ -213,12 +220,12 @@ public class DHT {
             String fileName = record[0];
             String yourIP = record[2];
 
-            //TODO Uncomment
-            //if(theTable.containsKey(fileName)){
-            //    theTable.remove(fileName);
-            //    records.remove(recordNum);
-            //    recordNum--;
-            //}
+
+            if(theTable.containsKey(fileName)){
+                theTable.remove(fileName);
+                records.remove(recordNum);
+                recordNum--;
+            }
         }
 
         //records.remove(0);
@@ -227,8 +234,8 @@ public class DHT {
             out += records.get(i) + "?";
         }
 
-        //TODO uncomment
-        //forwardEntry("EXIT~" + out, IPAddress, port);
+
+        forwardEntry(out, destIPAddress, destPort);
     }
 
     /*Between DHT && DHT*/
@@ -241,9 +248,9 @@ public class DHT {
     }
 
     //TODO forwardRemovalRecords for P2P_Client remove()
-    public static void forwardEntry(String content, String IPAddress, int port) throws IOException {
+    public static void forwardEntry(String content, String clientIPAddress, int clientPort) throws IOException {
         //call TCP Client to send data
-
+        TCPClient("EXIT~" + content, clientIPAddress, clientPort);
         //if back to original DHT
         //remove()?
     }
@@ -293,6 +300,7 @@ public class DHT {
                     TCPServer(content, destIP, destPort);
                 } catch (IOException e) {
                     System.out.println("Incorrect String content, String destIP, or int destPort.");
+                    e.printStackTrace();
                 }
             }
         }
