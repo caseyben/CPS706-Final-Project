@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.time.*;
 import java.text.*;
+import java.nio.charset.Charset;
 
 public class P2P_Server{
     final private static int OK = 200;
@@ -36,11 +37,10 @@ public class P2P_Server{
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
 				String response = in.readUTF();
-
 				response = OK + " " + port;
-				connectionSocket.close();	
-				}
-				catch(Exception e){
+				connectionSocket.close();
+				out.writeUTF(response);
+				}catch(Exception e){
 					System.out.println(e);
 				}	
 			}//while
@@ -65,27 +65,51 @@ public class P2P_Server{
 		Runnable activeThreadProcess = new Runnable(){
 			public void run(){
 				try{
-					String requestCode, filename, connection;
+					String requestCode, filename, connection, fileLastModified, responseString;
+					double fileLength;
 					Socket socket = activeSocket.accept();
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					String current = in.readUTF();
 					Scanner scanner = new Scanner(current);
+					byte[] byteArray;
 
 					requestCode = scanner.next();
 
 					if(requestCode == "GET"){
 						filename = scanner.next();
 						connection = "Close";
-
 						filename = filename.substring(1);
 						File file = new File(filename);
+						byteArray = new byte[(int)file.length()];
+						try{//Server Responds 200 OK
+							if(file.exists()){
 
-						try{
-							
-						}catch(Exception e){
+								fileLastModified = generateLastModified(file);
+								responseString = generateHTTPResponse(OK, connection, generateDate(), generateLastModified(file), (double)file.length());
+								byteArray = responseString.getBytes(Charset.forName("UTF-8"));
+								FileInputStream fileInput = new FileInputStream(file);
+								byte[] fileByteArray = new byte[(int)file.length()];
 
-						}
+								fileInput.read(fileByteArray);
+								fileInput.close();
+								
+								byte[] combinedArray = new byte[byteArray.length + fileByteArray.length];
+								System.arraycopy(byteArray, 0, combinedArray, 0, byteArray.length);
+								System.arraycopy(fileByteArray, 0, combinedArray, byteArray.length, fileByteArray.length);
 
+							}else{//Server Responds 404 NOT_FOUND
+								responseString = generateHTTPResponse(NOT_FOUND, connection, generateDate(), "", 0);
+								byteArray = responseString.getBytes(Charset.forName("UTF-8"));
+							}//if
+						}catch(Exception e){//Server Responds 400 BAD_REQUEST
+							responseString = generateHTTPResponse(BAD_REQUEST, connection, generateDate(), "", 0);
+							byteArray = responseString.getBytes(Charset.forName("UTF-8"));
+						}//try
+						DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
+						dataOutput.writeInt(byteArray.length);
+						dataOutput.write(byteArray, 0, byteArray.length);
+						socket.close();
+						activeSocket.close();
 					}//if
 				}catch(Exception e){
 					System.err.println("Process Errored");
@@ -93,7 +117,7 @@ public class P2P_Server{
 			}//run
 		};//activeThreadProcess
 
-		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, int lengthOfFile) throws Exception{
+		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, double lengthOfFile) throws Exception{
 			String message = "";
 	
 			if(statusCode == OK){
@@ -119,8 +143,10 @@ public class P2P_Server{
 		}//generateDate
 
 		public String generateLastModified(File file) throws Exception{
-
-			return "";
+			Date date = new Date(file.lastModified());
+			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+		  	dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		 	return dateFormat.format(date) + " GMT";
 		}//generateLastModified
 	}//activeClient
 
