@@ -19,14 +19,22 @@ public class P2P_Client {
     // The number of DHT servers
     private static final int NUM_DHT_SERVERS = 4;
 
+    // The IP of the initial DHT connection
+    private static String initDHTIP;
+
+    // The port of the initial DHT connection
+    private static int initDHTPort;
+
     public static void main(String[] args) throws Exception {
+        initDHTIP = args[0];
+        initDHTPort = Integer.valueOf(args[1]);
         Thread thread = new Thread(runnable);
         thread.start();
     }
 
 	static Runnable runnable = new Runnable() {
         public void run(){
-            Client client = new Client("135.0.211.153", 25565);
+            Client client = new Client(initDHTIP, initDHTPort);
             Scanner scanner = new Scanner(System.in);
             String input;
             while(true){
@@ -84,12 +92,11 @@ public class P2P_Client {
         // Initializes DHTPool which stores the IPs and ports of current DHT
         private static LinkedHashMap<String,Integer> DHTPool= new LinkedHashMap<String,Integer>();
 
-        // 
+        // Initializes localRecords which stores which files the client has stored
         private static ArrayList<String> localRecords = new ArrayList<String>();
 
         public Client(String IP, int port){
             DHTPool.put(IP, port);
-            
             try{
                init();
             }
@@ -107,11 +114,8 @@ public class P2P_Client {
         public static void sendToDHT(String message, String IP, int port) throws IOException {
             byte[] sendData = new byte[4096];
             sendData = message.getBytes();
-
             InetAddress addr = InetAddress.getByName(IP);
-
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, addr, port);
-
             UDPSocket.send(sendPacket);
         }
 
@@ -163,6 +167,9 @@ public class P2P_Client {
             }
         }
 
+        /**
+         * Queries for an image from DHT and sends GET request for that image
+         */
         public void query(String file) throws Exception{
             int id = hashKey(file);
             sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
