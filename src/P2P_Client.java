@@ -25,6 +25,7 @@ public class P2P_Client {
     // The port of the initial DHT connection
     private static int initDHTPort;
 
+    private static int port = 20440;
     public static void main(String[] args) throws Exception {
         initDHTIP = args[0];
         initDHTPort = Integer.valueOf(args[1]);
@@ -207,71 +208,6 @@ public class P2P_Client {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
 
     public void P2PServerConnect(String message){
@@ -301,7 +237,7 @@ public class P2P_Client {
 
     public String generateHTTP(String filename, String hostname, String connectionStatus){
         String http = "";
-        http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + status + "\r\nAccept-language: en-us\r\n";
+        http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
         return http;
     }//generateHTTP
 }
