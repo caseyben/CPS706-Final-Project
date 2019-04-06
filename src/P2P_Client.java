@@ -39,7 +39,7 @@ public class P2P_Client {
 
 	static Runnable runnable = new Runnable() {
         public void run(){
-            Client client = new Client("10.17.237.19", 20069);
+            Client client = new Client(initDHTIP, initDHTPort);
             P2P_Server server = new P2P_Server();
             Scanner scanner = new Scanner(System.in);
             String[] input;
