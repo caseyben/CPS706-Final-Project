@@ -1,7 +1,6 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class DHT {
     private static final int NUM_DHT_SERVERS = 4;
@@ -23,10 +22,8 @@ public class DHT {
     }
 
     public static void main(String[] args) throws IOException {
-        //TODO Hashtable(K, V) = (Name of file wanted, IP address of client with it)
 
         init();
-        String key = "kimi no na wa";
         //System.out.println(hashKey(key));
         startTCPServer("", "", 0);
         //startTCPServer("", "", 25566);
@@ -40,7 +37,7 @@ public class DHT {
         //TCPServer(25567);
         //TCPServer(25568);
 
-        TCPClient("", "", 25565);
+        //TCPClient("", "", 25565);
         //TCPClient("", "", 25566);
         //TCPClient("", "", 25567);
         //TCPClient("", "", 25568);
@@ -49,7 +46,7 @@ public class DHT {
     public static void UDPClient(String message, String destIP, int destPort) throws IOException {
         //DatagramSocket UDP_ClientSocket = new DatagramSocket(25565);
         //Prepare Message
-        byte[] UDP_sendData = new byte[4096];
+        byte[] UDP_sendData;
         UDP_sendData = message.getBytes();
 
         InetAddress UDP_returnIPAddress = InetAddress.getByName(destIP);
@@ -126,9 +123,9 @@ public class DHT {
 
         //Out
         DataOutputStream TCP_toServer = new DataOutputStream(TCP_clientSocket.getOutputStream());
-        TCP_toServer.writeBytes("This is TCP_client on port: " + DHT_PORT + " " + '\n');
+        //TCP_toServer.writeBytes("This is TCP_client on port: " + DHT_PORT + " " + '\n');
 
-        String toServerString = content + "$" + IPAddress + "$" + port;
+        String toServerString = content + "$" + IPAddress + "$" + port + " " + '\n';
 
         if(TCP_sendArray[0].equals("GET_IP")){
             TCP_toServer.writeBytes(toServerString);
@@ -162,18 +159,18 @@ public class DHT {
              String[] TCP_receiveMessageArray = TCP_receiveMessage.split("~");
 
              //Out
-             DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
-             TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
+             //DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
+             //TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
              if(TCP_receiveMessageArray[0].equals("GET_IP")){
                  if(TCP_receiveMessageArray.length == 1){
-                     TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
+                     TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                  } else {
                      String[] IPArray = TCP_receiveMessageArray[1].split("\\?");
-                     if(IPArray.length == 3){
-                         UDPClient(TCP_receiveArray[0], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
+                     if(IPArray.length == 1){ //TODO change to 3
+                         UDPClient(TCP_receiveMessageArray[1], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      } else {
                          TCP_receiveArray[0] += DHT_IP_Address + ":" + DHT_PORT + "?";
-                         TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
+                         TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      }
                  }
 
