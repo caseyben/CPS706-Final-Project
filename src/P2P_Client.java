@@ -29,7 +29,7 @@ public class P2P_Client {
     // The port of the initial DHT connection
     private static int initDHTPort;
 
-
+    private static int port = 20440;
     public static void main(String[] args) throws Exception {
         initDHTIP = args[0];
         initDHTPort = Integer.valueOf(args[1]);
