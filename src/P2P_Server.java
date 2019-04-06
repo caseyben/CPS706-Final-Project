@@ -21,7 +21,7 @@ public class P2P_Server{
 			mainSocket = new ServerSocket(port);
 			mainThread = new Thread(mainThreadProcess);
 			mainThread.start();
-		}catch(IOException e){
+		}catch(Exception e){
 			System.err.println("Port Not Available.");
 		}//try
 	}//constructor
@@ -30,14 +30,19 @@ public class P2P_Server{
 	Runnable mainThreadProcess = new Runnable (){
 		public void run(){
 			while(true){
-				Socket connectionSocket = socket.accept();
+				try{
+				Socket connectionSocket = mainSocket.accept();
 				DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
 				String response = in.readUTF();
 
 				response = OK + " " + port;
-				connectionSocket.close();		
+				connectionSocket.close();	
+				}
+				catch(Exception e){
+					System.out.println(e);
+				}	
 			}//while
 		}//run
 	};//mainThreadProcess
@@ -51,7 +56,7 @@ public class P2P_Server{
 				activeSocket = new ServerSocket(port);
 				activeThread = new Thread(activeThreadProcess);
 				activeThread.start();
-			}catch(IOException e){
+			}catch(Exception e){
 				System.err.println("Port Not Available.");
 			}//try
 
@@ -75,14 +80,20 @@ public class P2P_Server{
 						filename = filename.substring(1);
 						File file = new File(filename);
 
+						try{
+							
+						}catch(Exception e){
+
+						}
+
 					}//if
-				}catch(IOException e){
+				}catch(Exception e){
 					System.err.println("Process Errored");
 				}//try
 			}//run
 		};//activeThreadProcess
 
-		public String generateHTTP(int statusCode, String connectionStatus, String date, String lastModifiedDate, int lengthOfFile){
+		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, int lengthOfFile) throws Exception{
 			String message = "";
 	
 			if(statusCode == OK){
@@ -100,14 +111,14 @@ public class P2P_Server{
 			return message;
 		}//generateHTTP
 
-		public String generateDate(){
+		public String generateDate() throws Exception{
 			Date date = new Date();
   			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
  			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 			return dateFormat.format(date) + " GMT";
 		}//generateDate
 
-		public String generateLastModified(File file){
+		public String generateLastModified(File file) throws Exception{
 
 			return "";
 		}//generateLastModified
