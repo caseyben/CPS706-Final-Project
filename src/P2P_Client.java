@@ -18,7 +18,7 @@ public class P2P_Client {
     private static final int HTTP_NOT_SUPPORTED = 505;
 
     // The number of DHT servers
-    private static final int NUM_DHT_SERVERS = 4;
+    private static final int NUM_DHT_SERVERS = 2;
 
     // The assigned port number
     private static final int port = 20440;
@@ -29,24 +29,23 @@ public class P2P_Client {
     // The port of the initial DHT connection
     private static int initDHTPort;
 
-    private static int port = 20440;
     public static void main(String[] args) throws Exception {
-        initDHTIP = args[0];
-        initDHTPort = Integer.valueOf(args[1]);
+        //initDHTIP = args[0];
+        //initDHTPort = Integer.valueOf(args[1]);
         Thread thread = new Thread(runnable);
         thread.start();
     }
 
 	static Runnable runnable = new Runnable() {
         public void run(){
-            Client client = new Client(initDHTIP, initDHTPort);
+            Client client = new Client("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
             P2P_Server server = new P2P_Server();
             Scanner scanner = new Scanner(System.in);
             String[] input;
             while(true){
                 System.out.print("Enter input: ");
                 input = scanner.nextLine().split(" ");
-                if(input[0].equalsIgnoreCase("query")){
+                if(input[0].equalsIgnoreCase("query") && input.length>1){
                     String file = input[1];
                    // System.out.print("Enter file name: ");
                     //String file = scanner.next();
@@ -57,7 +56,7 @@ public class P2P_Client {
                         System.out.println(e);
                     }
                 }
-                else if(input[0].equalsIgnoreCase("insert")){
+                else if(input[0].equalsIgnoreCase("insert") && input.length>1){
                     //System.out.print("Enter file name: ");
                     //String fileName = scanner.next();
                     String fileName = input[1];
@@ -147,7 +146,7 @@ public class P2P_Client {
             UDPSocket = new DatagramSocket();
             sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
             String resp = receiveFromDHT();
-            //System.out.println(resp);
+            System.out.println(resp);
             fillDHTPool(resp);
             System.out.println(DHTPool.toString());
         }
@@ -160,7 +159,7 @@ public class P2P_Client {
             byte[] receiveData = new byte[4096];
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             UDPSocket.receive(receivePacket);
-            return new String(receivePacket.getData());
+            return new String(receivePacket.getData()).trim();
         }
 
         /**
@@ -182,7 +181,7 @@ public class P2P_Client {
             int id = hashKey(file);
             sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
             String resp = receiveFromDHT().trim();
-            P2PServerConnect(resp,file);
+            //P2PServerConnect(resp,file);
             System.out.println(resp);
         }
 
@@ -192,7 +191,7 @@ public class P2P_Client {
          */
         public void insert(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
+            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
 
             localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());
             System.out.println(localRecords.toString());
