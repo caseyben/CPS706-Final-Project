@@ -30,7 +30,7 @@ public class P2P_Server{
 	Runnable mainThreadProcess = new Runnable (){
 		public void run(){
 			while(true){
-				Socket connectionSocket = socket.accept();
+				Socket connectionSocket = mainSocket.accept();
 				DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
