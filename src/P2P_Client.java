@@ -36,13 +36,14 @@ public class P2P_Client {
         public void run(){
             Client client = new Client(initDHTIP, initDHTPort);
             Scanner scanner = new Scanner(System.in);
-            String input;
+            String[] input;
             while(true){
                 System.out.print("Enter input: ");
-                input = scanner.next();
-                if(input.equalsIgnoreCase("query")){
-                    System.out.print("Enter file name: ");
-                    String file = scanner.next();
+                input = scanner.nextLine().split(" ");
+                if(input[0].equalsIgnoreCase("query")){
+                    String file = input[1];
+                   // System.out.print("Enter file name: ");
+                    //String file = scanner.next();
                     try{
                         client.query(file);
                     }
@@ -50,9 +51,10 @@ public class P2P_Client {
                         System.out.println(e);
                     }
                 }
-                else if(input.equalsIgnoreCase("insert")){
-                    System.out.print("Enter file name: ");
-                    String fileName = scanner.next();
+                else if(input[0].equalsIgnoreCase("insert")){
+                    //System.out.print("Enter file name: ");
+                    //String fileName = scanner.next();
+                    String fileName = input[1];
                     File file = new File(fileName);
                     if(file.exists()){
                         try{
@@ -66,10 +68,10 @@ public class P2P_Client {
                         System.out.println("File does not exist");
                     }
                 }
-                else if(input.equalsIgnoreCase("help")){
+                else if(input[0].equalsIgnoreCase("help")){
                     System.out.print("insert fileName - insert a file\nquery fileName - query for content\nexit - exit program\n");
                 }
-                else if(input.equalsIgnoreCase("exit")){
+                else if(input[0].equalsIgnoreCase("exit")){
                     try{
                         client.exit();
                     }
@@ -78,7 +80,7 @@ public class P2P_Client {
                     }
                 }
                 else{
-                    System.out.println("Invalid input.");
+                    System.out.println("Invalid input. Type \"help\" for options.");
                 }
                 System.out.println("-----------");
             }
