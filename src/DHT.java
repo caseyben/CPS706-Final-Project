@@ -118,7 +118,7 @@ public class DHT {
 
     public static void TCPClient(String content, String IPAddress, int port) throws IOException {
         //Establish Socket
-        Socket TCP_clientSocket = new Socket("192.168.0.166", SUCCESSOR_PORT); //TODO change to DHT_SUCCESSOR_IP
+        Socket TCP_clientSocket = new Socket("192.168.0.151", SUCCESSOR_PORT); //TODO change to DHT_SUCCESSOR_IP
         System.out.println("TCP_Client on port: " + SUCCESSOR_PORT);
 
         String[] TCP_sendArray = content.split("~");
@@ -126,7 +126,7 @@ public class DHT {
 
         //Out
         DataOutputStream TCP_toServer = new DataOutputStream(TCP_clientSocket.getOutputStream());
-        TCP_toServer.writeBytes("This is TCP_client on port: " + port + " " + '\n');
+        TCP_toServer.writeBytes("This is TCP_client on port: " + DHT_PORT + " " + '\n');
 
         String toServerString = content + "$" + IPAddress + "$" + port;
 
@@ -157,7 +157,7 @@ public class DHT {
              String TCP_fromClientText = TCP_fromClient.readLine();
              System.out.println(TCP_fromClientText);
 
-             String[] TCP_receiveArray = TCP_fromClientText.split("$");
+             String[] TCP_receiveArray = TCP_fromClientText.split("\\$");
              String TCP_receiveMessage = TCP_receiveArray[0];
              String[] TCP_receiveMessageArray = TCP_receiveMessage.split("~");
 
@@ -165,18 +165,24 @@ public class DHT {
              DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
              TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
              if(TCP_receiveMessageArray[0].equals("GET_IP")){
-                 String[] IPArray = TCP_receiveMessageArray[1].split("\\?");
-                 if(IPArray.length == 3){
-                     UDPClient(content, IPAddress, port);
+                 if(TCP_receiveMessageArray.length == 1){
+                     TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
                  } else {
-                     content += DHT_IP_Address + DHT_PORT + "?";
-                     TCPClient(content, IPAddress, port);
+                     String[] IPArray = TCP_receiveMessageArray[1].split("\\?");
+                     if(IPArray.length == 3){
+                         UDPClient(TCP_receiveArray[0], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
+                     } else {
+                         TCP_receiveArray[0] += DHT_IP_Address + ":" + DHT_PORT + "?";
+                         TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
+                     }
                  }
+
+
              } else if(TCP_receiveMessageArray[0].equals("EXIT")){
                  if(TCP_receiveMessageArray.length == 1){
-                    System.out.println("Completed removing records for client at: " + IPAddress + ":" + port);
+                    System.out.println("Completed removing records for client at: " + TCP_receiveArray[1] + ":" + Integer.valueOf(TCP_receiveArray[2]));
                  } else {
-                     remove(TCP_receiveMessageArray[1], IPAddress, port);
+                     remove(TCP_receiveMessageArray[1], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2]));
                  }
              }
 
