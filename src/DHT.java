@@ -22,10 +22,8 @@ public class DHT {
     }
 
     public static void main(String[] args) throws IOException {
-        //TODO Hashtable(K, V) = (Name of file wanted, IP address of client with it)
 
         init();
-        String key = "kimi no na wa";
         //System.out.println(hashKey(key));
         startTCPServer("", "", 0);
         //startTCPServer("", "", 25566);
@@ -48,7 +46,7 @@ public class DHT {
     public static void UDPClient(String message, String destIP, int destPort) throws IOException {
         //DatagramSocket UDP_ClientSocket = new DatagramSocket(25565);
         //Prepare Message
-        byte[] UDP_sendData = new byte[4096];
+        byte[] UDP_sendData;
         UDP_sendData = message.getBytes();
 
         InetAddress UDP_returnIPAddress = InetAddress.getByName(destIP);
@@ -161,15 +159,15 @@ public class DHT {
              String[] TCP_receiveMessageArray = TCP_receiveMessage.split("~");
 
              //Out
-             DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
-             TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
+             //DataOutputStream TCP_toClient = new DataOutputStream(TCP_serverConnectionSocket.getOutputStream());
+             //TCP_toClient.writeBytes("\"" + TCP_fromClientText + "\" ACK!" + '\n');
              if(TCP_receiveMessageArray[0].equals("GET_IP")){
                  if(TCP_receiveMessageArray.length == 1){
                      TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                  } else {
                      String[] IPArray = TCP_receiveMessageArray[1].split("\\?");
-                     if(IPArray.length == 2){ //TODO change to 3
-                         UDPClient(TCP_receiveMessageArray[0], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
+                     if(IPArray.length == 1){ //TODO change to 3
+                         UDPClient(TCP_receiveMessageArray[1], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      } else {
                          TCP_receiveArray[0] += DHT_IP_Address + ":" + DHT_PORT + "?";
                          TCPClient(TCP_receiveArray[0] + DHT_IP_Address + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
