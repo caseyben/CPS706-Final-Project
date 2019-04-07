@@ -224,11 +224,10 @@ public class P2P_Client {
 
                 output.writeUTF("Open");
 
-                String resp = input.readUTF();
+                String resp[] = input.readUTF().split(" ");
 
-                if(Integer.valueOf(resp.split(" ")[0])==OK){
-					output.writeUTF(generateHTTP(file, IP, "close");
-                    System.out.println(resp);
+                if(Integer.valueOf(resp[0])==OK){
+                    sendHTTP(IP, Integer.valueOf(resp[1]), file);
                 }
                 socket.close();
             }catch(Exception e){
@@ -237,6 +236,22 @@ public class P2P_Client {
             }
         }//P2PServerConnect
 
+        public static void sendHTTP(String IP, int port, String file){
+            try{
+                System.out.println(port);
+                Socket socket = new Socket("192.168.2.19", port);
+                DataInputStream input = new DataInputStream(socket.getInputStream());
+                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+
+                output.writeUTF(generateHTTP(file, IP, "close"));
+                String resp = input.readUTF();
+                System.out.println(resp);
+                socket.close();
+            }
+            catch(Exception e){
+                System.out.println("CLIENT: " + e);
+            }
+        }
         public void recieveFileFromServer(String fileName){
             byte[] file= new byte[20000];
 

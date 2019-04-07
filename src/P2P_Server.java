@@ -40,14 +40,14 @@ public class P2P_Server{
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
 				String response = in.readUTF();
-				int portToPass = seekPort(port);
+				int portToPass = seekPort(port+1);
 				response = OK + " " + portToPass;
 				out.writeUTF(response);
 
-				clientList.add(new activeClient());
+				clientList.add(new activeClient(portToPass));
 				connectionSocket.close();
 				}catch(Exception e){
-					System.out.println("SERVER: " + e);
+					System.out.println("SERVER (main thread): " + e);
 				}	
 			}//while
 		}//run
@@ -63,7 +63,7 @@ public class P2P_Server{
 				activeThread = new Thread(activeThreadProcess);
 				activeThread.start();
 			}catch(Exception e){
-				System.err.println("SERVER: " + e);
+				System.err.println("SERVER (active thread): " + e);
 			}//try
 
 		}//constructor
@@ -157,7 +157,7 @@ public class P2P_Server{
 
 		while(portNotFound){
 			try{
-				ServerSocket attempt = new Socket(basePort);
+				ServerSocket attempt = new ServerSocket(basePort);
 				portNotFound = false;
 			}catch (Exception e){
 				basePort++;
