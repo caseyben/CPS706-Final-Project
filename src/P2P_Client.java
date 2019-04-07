@@ -181,8 +181,13 @@ public class P2P_Client {
             int id = hashKey(file);
             sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
             String resp = receiveFromDHT().trim();
-            P2PServerConnect(resp,file);
-            System.out.println(resp);
+            int port = receiveP2PPort(resp);
+            if(port != 0){
+                exchangeHTTP(resp, port, file);
+            }
+            else{
+                System.out.println("Error in retrieving file.");
+            }
         }
 
         /**
@@ -211,10 +216,7 @@ public class P2P_Client {
             System.exit(0);
         }
     
-
-        ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
-
-        public static void P2PServerConnect(String IP, String file){
+        public static int receiveP2PPort(String IP){
             try{
                 Socket socket = new Socket(IP, port);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -228,15 +230,17 @@ public class P2P_Client {
                 socket.close();
 
                 if(Integer.valueOf(resp[0])==OK){
-                    sendHTTP(IP, Integer.valueOf(resp[1]), file);
+                    return Integer.valueOf(resp[1]);
+                    //sendHTTP(IP, Integer.valueOf(resp[1]), file);
                 }
             }catch(Exception e){
                 System.out.println("CLIENT: " + e);
                 //System.err.println("Cannot connect to server.");
             }
+            return 0;
         }//P2PServerConnect
 
-        public static void sendHTTP(String IP, int port, String file){
+        public static void exchangeHTTP(String IP, int port, String file){
             try{
                 Socket socket = new Socket(IP, port);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
@@ -246,25 +250,23 @@ public class P2P_Client {
 
                 int len = input.readInt();
                 byte resp[] = new byte[len];
-
                 input.readFully(resp);
-                String string = new String(resp);
-                Scanner scanner = new Scanner(string);
-                scanner.nextLine();
-                scanner.nextLine();
-                scanner.nextLine();
-                scanner.nextLine();
-                int contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
-                scanner.nextLine();
 
-                int headerLength = resp.length-contentLength;
-                byte data[] = new byte[resp.length-headerLength];
-                for(int i = 0;i<contentLength;i++){
-                    data[i] = resp[i+headerLength];
-                }
-                
-                try(FileOutputStream fos = new FileOutputStream(file)){
-                    fos.write(data);
+                String responseString = new String(resp);
+                Scanner scanner = new Scanner(responseString);
+                int status = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+                if(status==OK){
+                    while(scanner.hasNextLine()){
+                        String line = scanner.nextLine();
+                        if(line.contains("Content-Length")){
+                            int contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+                            generateFile(resp,contentLength,file);
+                            break;
+                        }
+                        else{
+                            continue;
+                        }
+                    }
                 }
                 socket.close();
             }
@@ -272,21 +274,24 @@ public class P2P_Client {
                 System.out.println("CLIENT: " + e);
             }
         }
-        public void recieveFileFromServer(String fileName){
-            byte[] file= new byte[20000];
-
-        }//recieveFile
-
-        public String recieveHTTP(Scanner scanner){
-            String http = "";
-            return http;
-        }//recieveHTTP
 
         public static String generateHTTP(String filename, String hostname, String connectionStatus){
             String http = "";
             http += "GET /" + filename + " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
             return http;
         }//generateHTTP
+        
+        public static void generateFile(byte resp[], int contentLength, String file) throws Exception{
+            int headerLength = resp.length-contentLength;
+            byte data[] = new byte[resp.length-headerLength];
+            for(int i = 0;i<contentLength;i++){
+                data[i] = resp[i+headerLength];
+            }
+            
+            try(FileOutputStream fos = new FileOutputStream(file)){
+                fos.write(data);
+            }
+        }
     }
 }
 
