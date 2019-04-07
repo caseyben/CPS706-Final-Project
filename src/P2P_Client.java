@@ -40,7 +40,6 @@ public class P2P_Client {
         public void run(){
             Client client = new Client("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
             P2P_Server server = new P2P_Server();
-            //client.P2PServerConnect("test","GET /fig1.jpeg");
             Scanner scanner = new Scanner(System.in);
             String[] input;
             while(true){
@@ -217,7 +216,7 @@ public class P2P_Client {
 
         public static void P2PServerConnect(String IP, String file){
             try{
-                Socket socket = new Socket("192.168.2.19", port);
+                Socket socket = new Socket(IP, port);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                 
@@ -239,8 +238,7 @@ public class P2P_Client {
 
         public static void sendHTTP(String IP, int port, String file){
             try{
-                System.out.println(port);
-                Socket socket = new Socket("192.168.2.19", port);
+                Socket socket = new Socket(IP, port);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
@@ -251,30 +249,23 @@ public class P2P_Client {
 
                 input.readFully(resp);
                 String string = new String(resp);
-                String s = string.substring(0,string.lastIndexOf("\r\n"));
-                System.out.println(s.length());
-                byte str2[] = string.substring(string.lastIndexOf("\r\n")-1).getBytes();
+                Scanner scanner = new Scanner(string);
+                scanner.nextLine();
+                scanner.nextLine();
+                scanner.nextLine();
+                scanner.nextLine();
+                int contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+                scanner.nextLine();
 
-                try(FileOutputStream fos = new FileOutputStream("C:/Users/KC/Desktop/Casey's Folder/fig1.jpeg")){
-                    fos.write(str2);
+                int headerLength = resp.length-contentLength;
+                byte data[] = new byte[resp.length-headerLength];
+                for(int i = 0;i<contentLength;i++){
+                    data[i] = resp[i+headerLength];
                 }
-
-
-               /* Scanner scanner = new Scanner(string);
                 
-                int code = Integer.valueOf(scanner.nextLine().split(" ")[1]);
-                if(code == OK){
-                    for(int i = 0;i<3;i++){
-                        scanner.nextLine();
-                    }
-                }*/
- 
-                //System.out.println(str2);
-
-
-                //long contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
-               // System.out.println(contentLength);  
-
+                try(FileOutputStream fos = new FileOutputStream("/")){
+                    fos.write(data);
+                }
                 socket.close();
             }
             catch(Exception e){
