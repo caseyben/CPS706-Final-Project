@@ -226,10 +226,11 @@ public class P2P_Client {
 
                 String resp[] = input.readUTF().split(" ");
 
+                socket.close();
+
                 if(Integer.valueOf(resp[0])==OK){
                     sendHTTP(IP, Integer.valueOf(resp[1]), file);
                 }
-                socket.close();
             }catch(Exception e){
                 System.out.println("CLIENT: " + e);
                 //System.err.println("Cannot connect to server.");

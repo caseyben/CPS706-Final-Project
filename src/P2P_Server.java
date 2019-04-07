@@ -81,7 +81,7 @@ public class P2P_Server{
 
 					requestCode = scanner.next();
 
-					if(requestCode == "GET"){
+					if(requestCode.contains("GET")){
 						filename = scanner.next();
 						connection = "Close";
 						filename = filename.substring(1);
@@ -100,6 +100,7 @@ public class P2P_Server{
 								byte[] combinedArray = new byte[byteArray.length + fileByteArray.length];
 								System.arraycopy(byteArray, 0, combinedArray, 0, byteArray.length);
 								System.arraycopy(fileByteArray, 0, combinedArray, byteArray.length, fileByteArray.length);
+								byteArray = combinedArray;
 
 							}else{//Server Responds 404 NOT_FOUND
 								responseString = generateHTTPResponse(NOT_FOUND, connection, generateDate(null), "", 0);
@@ -110,8 +111,9 @@ public class P2P_Server{
 							byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 						}//try
 						DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
-						dataOutput.writeInt(byteArray.length);
-						dataOutput.write(byteArray, 0, byteArray.length);
+						//dataOutput.writeInt(byteArray.length);
+						//dataOutput.write(byteArray, 0, byteArray.length);
+						//dataOutput.writeUTF("TEST");
 						socket.close();
 						activeSocket.close();
 					}//if
@@ -159,6 +161,7 @@ public class P2P_Server{
 			try{
 				ServerSocket attempt = new ServerSocket(basePort);
 				portNotFound = false;
+				attempt.close();
 			}catch (Exception e){
 				basePort++;
 			}//try
