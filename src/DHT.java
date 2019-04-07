@@ -1,6 +1,12 @@
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Scanner;
 
 public class DHT {
     private static Hashtable<String, String> theTable = new Hashtable<>();
