@@ -227,6 +227,7 @@ public class P2P_Client {
                 String resp = input.readUTF();
 
                 if(Integer.valueOf(resp.split(" ")[0])==OK){
+					output.writeUTF(generateHTTP(file, IP, "close");
                     System.out.println(resp);
                 }
                 socket.close();
