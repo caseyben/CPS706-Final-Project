@@ -40,7 +40,14 @@ public class P2P_Client {
         thread.start();
     }
 
+    /**
+     * Runnable thread that creates a client and server object, listens for user input
+     */
 	static Runnable runnable = new Runnable() {
+
+        /**
+         * Override of run method for Runnable class
+         */
         public void run(){
             Client client = new Client(initDHTIP, initDHTPort);//("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
             P2P_Server server = new P2P_Server();
@@ -95,6 +102,10 @@ public class P2P_Client {
             }
         }
     };
+
+    /**
+     * Client class
+     */
     public static class Client{
 
         // Initializes UDP socket for communicating with DHTs
@@ -106,6 +117,11 @@ public class P2P_Client {
         // Initializes localRecords which stores which files the client has stored
         private static ArrayList<String> localRecords = new ArrayList<String>();
 
+        /**
+         * Client constructor, initiates client with DHT
+         * @param IP IP of the DHT with ID=1
+         * @param port Port of the DHT with ID=1
+         */
         public Client(String IP, int port){
             DHTPool.put(IP, port);
             try{
@@ -239,11 +255,9 @@ public class P2P_Client {
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                 
-
                 output.writeUTF("Open");
-
                 String resp[] = input.readUTF().split(" ");
-
+                
                 socket.close();
 
                 if(Integer.valueOf(resp[0])==OK){
@@ -331,7 +345,6 @@ public class P2P_Client {
             for(int i = 0;i<contentLength;i++){
                 data[i] = resp[i+headerLength];
             }
-            
             try(FileOutputStream fos = new FileOutputStream(file)){
                 fos.write(data);
                 System.out.println("File successfully created.");
