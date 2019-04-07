@@ -12,7 +12,7 @@ public class P2P_Server{
 	final private static int NOT_FOUND = 404;
 	final private static int HTTP_NOT_SUPPORTED = 505;
 
-	private static int port = 20440;
+	private static int port = 25565;
 
 	private ServerSocket mainSocket;
 	private Thread mainThread;
@@ -23,7 +23,8 @@ public class P2P_Server{
 			mainThread = new Thread(mainThreadProcess);
 			mainThread.start();
 		}catch(Exception e){
-			System.err.println("Port Not Available.");
+			System.out.println(e);
+			//System.err.println("Port Not Available.");
 		}//try
 	}//constructor
 	
@@ -38,10 +39,10 @@ public class P2P_Server{
 
 				String response = in.readUTF();
 				response = OK + " " + port;
-				connectionSocket.close();
 				out.writeUTF(response);
+				connectionSocket.close();
 				}catch(Exception e){
-					System.out.println(e);
+					System.out.println("SERVER: " + e);
 				}	
 			}//while
 		}//run
@@ -57,7 +58,7 @@ public class P2P_Server{
 				activeThread = new Thread(activeThreadProcess);
 				activeThread.start();
 			}catch(Exception e){
-				System.err.println("Port Not Available.");
+				System.err.println("SERVER: " + e);
 			}//try
 
 		}//constructor

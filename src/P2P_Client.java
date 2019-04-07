@@ -21,7 +21,7 @@ public class P2P_Client {
     private static final int NUM_DHT_SERVERS = 2;
 
     // The assigned port number
-    private static final int port = 20440;
+    private static final int port = 25565;
 
     // The IP of the initial DHT connection
     private static String initDHTIP;
@@ -40,6 +40,7 @@ public class P2P_Client {
         public void run(){
             Client client = new Client("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
             P2P_Server server = new P2P_Server();
+            //client.P2PServerConnect("test","GET /fig1.jpeg");
             Scanner scanner = new Scanner(System.in);
             String[] input;
             while(true){
@@ -181,7 +182,7 @@ public class P2P_Client {
             int id = hashKey(file);
             sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
             String resp = receiveFromDHT().trim();
-            //P2PServerConnect(resp,file);
+            P2PServerConnect(resp,file);
             System.out.println(resp);
         }
 
@@ -191,9 +192,9 @@ public class P2P_Client {
          */
         public void insert(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
+            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
 
-            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());
+            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[0].toString());//id-1
             System.out.println(localRecords.toString());
             //String resp = receiveFromDHT().trim();
             //System.out.println(resp);
@@ -210,40 +211,47 @@ public class P2P_Client {
             sendToDHT("EXIT~"+records, DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
             System.exit(0);
         }
+    
+
+        ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
+
+        public static void P2PServerConnect(String IP, String file){
+            try{
+                Socket socket = new Socket("192.168.2.19", port);
+                DataInputStream input = new DataInputStream(socket.getInputStream());
+                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+                
+
+                output.writeUTF("Open");
+
+                String resp = input.readUTF();
+
+                if(Integer.valueOf(resp.split(" ")[0])==OK){
+                    System.out.println(resp);
+                }
+                socket.close();
+            }catch(Exception e){
+                System.out.println("CLIENT: " + e);
+                //System.err.println("Cannot connect to server.");
+            }
+        }//P2PServerConnect
+
+        public void recieveFileFromServer(String fileName){
+            byte[] file= new byte[20000];
+
+        }//recieveFile
+
+        public String recieveHTTP(Scanner scanner){
+            String http = "";
+            return http;
+        }//recieveHTTP
+
+        public static String generateHTTP(String filename, String hostname, String connectionStatus){
+            String http = "";
+            http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
+            return http;
+        }//generateHTTP
     }
-
-    ////////////////////////////////P2P-Client -> P2P-Server Stuff/////////////////////////////////////////
-
-    public static void P2PServerConnect(String IP, String message){
-        try{
-            Socket socket = new Socket(IP, port);
-            DataInputStream input = new DataInputStream(socket.getInputStream());
-            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-
-            output.writeUTF(message);
-
-            message = input.readUTF();
-            socket.close();
-        }catch(IOException e){
-            System.err.println("Cannot connect to server.");
-        }
-    }//P2PServerConnect
-
-    public void recieveFileFromServer(String fileName){
-        byte[] file= new byte[20000];
-
-    }//recieveFile
-
-    public String recieveHTTP(Scanner scanner){
-        String http = "";
-        return http;
-    }//recieveHTTP
-
-    public String generateHTTP(String filename, String hostname, String connectionStatus){
-        String http = "";
-        http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
-        return http;
-    }//generateHTTP
 }
 
 //HTTP Request
