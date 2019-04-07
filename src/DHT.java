@@ -3,7 +3,6 @@ import java.io.*;
 import java.util.*;
 
 public class DHT {
-    private static final int NUM_DHT_SERVERS = 4;
     private static Hashtable<String, String> theTable = new Hashtable<>();
 
     private static int DHT_ID = 0;
@@ -40,7 +39,7 @@ public class DHT {
      * @param message the content to return
      * @param UDP_returnAddress the return IP address of the P2P_Client
      * @param UDP_returnPort the return port of the P2P_Client
-     * @throws IOException
+     * @throws IOException if an I/O error occurs or unknown host
      */
     private static void UDPClient(String message, String UDP_returnAddress, int UDP_returnPort) throws IOException {
         //Prepare Message
@@ -56,7 +55,7 @@ public class DHT {
 
     /**
      * Awaits UDP commands from P2P_Clients & parses them for processing
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private static void UDPServer() throws IOException { //UDP from Client --> Server
         System.out.println("UDP_Server on port: " + UDP_PORT);
@@ -109,7 +108,7 @@ public class DHT {
      * @param content content to process (IPs or Entries) with header
      * @param UDP_returnAddress the return IP address of the P2P_Client
      * @param UDP_returnPort the return port of the P2P_Client
-     * @throws IOException
+     * @throws IOException if an I/O error occurs or unknown host
      */
     private static void TCPClient(String content, String UDP_returnAddress, int UDP_returnPort) throws IOException {
         //Establish Socket
@@ -137,7 +136,7 @@ public class DHT {
 
     /**
      * Awaits TCP commands from previous DHT & parses them for processing
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private static void TCPServer() throws IOException {
         //Establish Socket
@@ -201,7 +200,7 @@ public class DHT {
      * @param content content P2P_Client is querying for
      * @param UDP_returnAddress the return IP address of the P2P_Client
      * @param UDP_returnPort the return port of the P2P_Client
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private static void retrieve(String content, String UDP_returnAddress, int UDP_returnPort) throws IOException {
         if(theTable.containsKey(content)){
@@ -217,7 +216,7 @@ public class DHT {
      * @param content content that was requested to be removed
      * @param UDP_returnAddress IP Address associated with record
      * @param UDP_returnPort Port associated with P2P_Client
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private static void remove(String content, String UDP_returnAddress, int UDP_returnPort) throws IOException {
         String out = "";
@@ -245,9 +244,9 @@ public class DHT {
     /**
      * Returns IP address of all DHTs to requesting P2P_Client.
      * Matches with P2P_Client init()
-     * @param UDP_returnAddress
-     * @param UDP_returnPort
-     * @throws IOException
+     * @param UDP_returnAddress the return IP address of the P2P_Client
+     * @param UDP_returnPort the return port of the P2P_Client
+     * @throws IOException if an I/O error occurs
      */
     private static void returnIPs(String UDP_returnAddress, int UDP_returnPort) throws IOException {
         //TCPClient("GET_IP~", UDP_returnAddress, UDP_returnPort); //add GET_IP~ header to content, then forward to successor DHT
@@ -255,7 +254,6 @@ public class DHT {
     }
 
     //TODO Error checking
-
     /**
      * Initialises the DHT with the following parameters, entered from the console
      * DHT_ID
@@ -283,31 +281,6 @@ public class DHT {
         System.out.println("SUCCESSOR_IP: " + SUCCESSOR_IP);
         System.out.println("SUCCESSOR_PORT: " + SUCCESSOR_PORT);
     }
-
-    /*public static void startTCPServer(String content, String destIP, int destPort) {
-        class InitTCPServer implements Runnable {
-            String content;
-            String destIP;
-            int destPort;
-
-            InitTCPServer(String content, String destIP, int destPort) {
-                this.content = content;
-                this.destIP = destIP;
-                this.destPort = destPort;
-            }
-
-            public void run() {
-                try {
-                    TCPServer();
-                } catch (IOException e) {
-                    System.out.println("Incorrect String content, String destIP, or int destPort.");
-                    e.printStackTrace();
-                }
-            }
-        }
-        Thread TCPServerThread = new Thread(new InitTCPServer(content, destIP, destPort));
-        TCPServerThread.start();
-    }*/
 
     /**
      * TCPServer Thread
