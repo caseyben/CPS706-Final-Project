@@ -12,18 +12,27 @@ import java.util.Scanner;
 import java.util.TimeZone;
 
 public class P2P_Server{
+	//Status Code for 200 OK response
     final private static int OK = 200;
+	//Status Code for 400 Bad Request response
 	final private static int BAD_REQUEST = 400;
+	//Status Code for 404 Not Found response
 	final private static int NOT_FOUND = 404;
+	//Status Code for 505 HTTP Version Not Supported Response
 	final private static int HTTP_NOT_SUPPORTED = 505;
 
 	private ArrayList<activeClient> clientList = new ArrayList<activeClient>();
 
-	private static int port = 25565;
+	//Default port to open P2P_Server server sockets on
+	final private static int DEFAULT_PORT = 25565;
 
+	//Instance variables
 	private ServerSocket mainSocket;
 	private Thread mainThread;
 
+	/**
+	 * Constructor for P2P_Server class
+	 */
 	public P2P_Server(){
 		try{
 			mainSocket = new ServerSocket(port);
@@ -36,7 +45,13 @@ public class P2P_Server{
 	}//constructor
 	
 	
+	/**
+	 * Static thread that runs whenever a client is instantiated
+	 */
 	Runnable mainThreadProcess = new Runnable (){
+		/**
+		 * Override of run method for Runnable class
+		 */
 		public void run(){
 			while(true){
 				try{
@@ -58,10 +73,17 @@ public class P2P_Server{
 		}//run
 	};//mainThreadProcess
 
+	/**
+	 * Class to instantiate when connection with another P2P Client is established
+	 */
 	public class activeClient{
 		private Thread activeThread;
 		private ServerSocket activeSocket;
 
+		/**
+		 * Constructor for activeClient class
+		 * @param activePort port to open socket on for communication between clients
+		 */
 		public activeClient(int activePort){
 			try{
 				activeSocket = new ServerSocket(activePort);
@@ -73,6 +95,9 @@ public class P2P_Server{
 
 		}//constructor
 
+		/**
+		 * Thread that runs whenever connection with another P2P Client is established
+		 */
 		Runnable activeThreadProcess = new Runnable(){
 			public void run(){
 				try{
@@ -128,6 +153,14 @@ public class P2P_Server{
 			}//run
 		};//activeThreadProcess
 
+		/**
+		 * Generates HTTP response to be sent to currently connected P2P Client
+		 * @param statusCode HTTP Status code that dictates contents of HTTP Response message
+		 * @param connectionStatus String to send that determines if connection should be maintained or closed
+		 * @param date Current date on local machine
+		 * @param lastModifiedDate Date that file to send was last modified
+		 * @param lengthOfFile Length of file in long
+		 */
 		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, long lengthOfFile) throws Exception{
 			String message = "";
 	
@@ -146,6 +179,10 @@ public class P2P_Server{
 			return message;
 		}//generateHTTP
 
+		/**
+		 * If file object is not null, generate the last modified date of the file. Else, generate the current date on local machine.
+		 * @param file file to generate last modified date
+		 */
 		public String generateDate(File file) throws Exception{
 			Date date;
 			if(file != null){
@@ -159,6 +196,10 @@ public class P2P_Server{
 		}//generateDate
 	}//activeClient
 
+	/**
+	 * Finds an available port to open new Socket for client-client connection.
+	 * @param basePort the port to increment when seeking an available port
+	 */
 	public int seekPort(int basePort){
 		boolean portNotFound = true;
 
