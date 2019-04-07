@@ -297,6 +297,7 @@ public class P2P_Client {
                         if(line.contains("Content-Length")){
                             int contentLength = Integer.valueOf(line.split(" ")[1]);
                             generateFile(resp,contentLength,file);
+                            scanner.close();
                             break;
                         }
                         else{
