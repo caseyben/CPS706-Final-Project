@@ -167,7 +167,7 @@ public class P2P_Client {
                 UDPSocket = new DatagramSocket();
                 sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
                 String resp = receiveFromDHT();
-                System.out.println(resp);
+                //System.out.println(resp);
                 fillDHTPool(resp);
                 System.out.println("Client successfully initiated.");
                 //System.out.println(DHTPool.toString());
@@ -295,7 +295,7 @@ public class P2P_Client {
                     while(scanner.hasNextLine()){
                         String line = scanner.nextLine();
                         if(line.contains("Content-Length")){
-                            int contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+                            int contentLength = Integer.valueOf(line.split(" ")[1]);
                             generateFile(resp,contentLength,file);
                             break;
                         }
