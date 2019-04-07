@@ -25,7 +25,7 @@ public class P2P_Client {
     private static final int NUM_DHT_SERVERS = 2;
 
     // The assigned port number
-    private static final int port = 25565;
+    private static final int DEFAULT_PORT = 25565;
 
     // The IP of the initial DHT connection
     private static String initDHTIP;
@@ -34,15 +34,15 @@ public class P2P_Client {
     private static int initDHTPort;
 
     public static void main(String[] args) throws Exception {
-        //initDHTIP = args[0];
-        //initDHTPort = Integer.valueOf(args[1]);
+        initDHTIP = args[0];
+        initDHTPort = Integer.valueOf(args[1]);
         Thread thread = new Thread(runnable);
         thread.start();
     }
 
 	static Runnable runnable = new Runnable() {
         public void run(){
-            Client client = new Client("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
+            Client client = new Client(initDHTIP, initDHTPort);//("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
             P2P_Server server = new P2P_Server();
             Scanner scanner = new Scanner(System.in);
             String[] input;
@@ -70,7 +70,7 @@ public class P2P_Client {
                             client.insert(fileName);
                         }
                         catch(Exception e){
-                            System.out.println(e);
+                            System.out.println("CLIENT: " + e);
                         }
                     }
                     else{
@@ -146,13 +146,19 @@ public class P2P_Client {
         /**
          * Initializes the client by gathering DHT IPs
          */
-        public void init() throws Exception{
-            UDPSocket = new DatagramSocket();
-            sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
-            String resp = receiveFromDHT();
-            System.out.println(resp);
-            fillDHTPool(resp);
-            System.out.println(DHTPool.toString());
+        public void init(){
+            try{
+                UDPSocket = new DatagramSocket();
+                sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
+                String resp = receiveFromDHT();
+                System.out.println(resp);
+                fillDHTPool(resp);
+                System.out.println("Client successfully initiated.");
+                //System.out.println(DHTPool.toString());
+            }
+            catch(Exception e){
+                System.out.println("Client could not be initiated.");
+            }
         }
 
         /**
@@ -203,7 +209,9 @@ public class P2P_Client {
             sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
 
             localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[0].toString());//id-1
-            System.out.println(localRecords.toString());
+
+            System.out.println("File " + file + " successfully inserted into DHT with ID " + id);
+            //System.out.println(localRecords.toString());
             //String resp = receiveFromDHT().trim();
             //System.out.println(resp);
         }
@@ -220,9 +228,14 @@ public class P2P_Client {
             System.exit(0);
         }
     
+        /**
+         * Establishes a TCP connection and receives an available port
+         * @param IP The IP address to start the TCP connection with
+         * @return The available port
+         */
         public static int receiveP2PPort(String IP){
             try{
-                Socket socket = new Socket(IP, port);
+                Socket socket = new Socket(IP, DEFAULT_PORT);
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                 
@@ -235,15 +248,19 @@ public class P2P_Client {
 
                 if(Integer.valueOf(resp[0])==OK){
                     return Integer.valueOf(resp[1]);
-                    //sendHTTP(IP, Integer.valueOf(resp[1]), file);
                 }
             }catch(Exception e){
                 System.out.println("CLIENT: " + e);
-                //System.err.println("Cannot connect to server.");
             }
             return 0;
-        }//P2PServerConnect
+        }
 
+        /**
+         * Sends an HTTP request and receives a response
+         * @param IP The IP to open the TCP connection with
+         * @param port The port to open the TCP connection with
+         * @param file The file name to retrieve
+         */
         public static void exchangeHTTP(String IP, int port, String file){
             try{
                 Socket socket = new Socket(IP, port);
@@ -260,6 +277,7 @@ public class P2P_Client {
                 Scanner scanner = new Scanner(responseString);
                 int status = Integer.valueOf(scanner.nextLine().split(" ")[1]);
                 if(status==OK){
+                    System.out.println(OK + " Success: HTTP response received.");
                     while(scanner.hasNextLine()){
                         String line = scanner.nextLine();
                         if(line.contains("Content-Length")){
@@ -272,6 +290,15 @@ public class P2P_Client {
                         }
                     }
                 }
+                else if(status==BAD_REQUEST){
+                    System.out.println(BAD_REQUEST + " Error: Bad request");
+                }
+                else if(status==NOT_FOUND){
+                    System.out.println(NOT_FOUND + " Error: File not found.");
+                }
+                else if(status==HTTP_NOT_SUPPORTED){
+                    System.out.println(HTTP_NOT_SUPPORTED + " Error: HTTP version not supported.");
+                }
                 socket.close();
             }
             catch(Exception e){
@@ -279,12 +306,25 @@ public class P2P_Client {
             }
         }
 
+        /**
+         * Generates an HTTP GET request
+         * @param filename The name of the file to retrieve
+         * @param hostname The name of the host
+         * @param connectionStatus The connection status of the HTTP request
+         * @return The HTTP request
+         */
         public static String generateHTTP(String filename, String hostname, String connectionStatus){
             String http = "";
             http += "GET /" + filename + " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
             return http;
-        }//generateHTTP
+        }
         
+        /**
+         * Generates a file from a byte array
+         * @param resp The byte array to be made into a file
+         * @param contentLength The length of the content contained in resp
+         * @param file The name of the file
+         */
         public static void generateFile(byte resp[], int contentLength, String file) throws Exception{
             int headerLength = resp.length-contentLength;
             byte data[] = new byte[resp.length-headerLength];
@@ -294,6 +334,10 @@ public class P2P_Client {
             
             try(FileOutputStream fos = new FileOutputStream(file)){
                 fos.write(data);
+                System.out.println("File successfully created.");
+            }
+            catch(Exception e){
+                System.out.println("File could not be created.");
             }
         }
     }
