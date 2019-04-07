@@ -35,7 +35,7 @@ public class P2P_Server{
 	 */
 	public P2P_Server(){
 		try{
-			mainSocket = new ServerSocket(port);
+			mainSocket = new ServerSocket(DEFAULT_PORT);
 			mainThread = new Thread(mainThreadProcess);
 			mainThread.start();
 		}catch(Exception e){
@@ -60,7 +60,7 @@ public class P2P_Server{
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
 				String response = in.readUTF();
-				int portToPass = seekPort(port+1);
+				int portToPass = seekPort(DEFAULT_PORT+1);
 				response = OK + " " + portToPass;
 				out.writeUTF(response);
 
