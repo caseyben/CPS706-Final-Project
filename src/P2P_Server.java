@@ -72,7 +72,7 @@ public class P2P_Server{
 			public void run(){
 				try{
 					String requestCode, filename, connection, responseString;
-					double fileLength;
+					int fileLength;
 					Socket socket = activeSocket.accept();
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					String current = in.readUTF();
@@ -89,7 +89,7 @@ public class P2P_Server{
 						byteArray = new byte[(int)file.length()];
 						try{//Server Responds 200 OK
 							if(file.exists()){
-								responseString = generateHTTPResponse(OK, connection, generateDate(null), generateDate(file), (double)file.length());
+								responseString = generateHTTPResponse(OK, connection, generateDate(null), generateDate(file), file.length());
 								byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 								FileInputStream fileInput = new FileInputStream(file);
 								byte[] fileByteArray = new byte[(int)file.length()];
@@ -111,8 +111,8 @@ public class P2P_Server{
 							byteArray = responseString.getBytes(Charset.forName("UTF-8"));
 						}//try
 						DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
-						//dataOutput.writeInt(byteArray.length);
-						//dataOutput.write(byteArray, 0, byteArray.length);
+						dataOutput.writeInt(byteArray.length);
+						dataOutput.write(byteArray, 0, byteArray.length);
 						//dataOutput.writeUTF("TEST");
 						socket.close();
 						activeSocket.close();
@@ -123,7 +123,7 @@ public class P2P_Server{
 			}//run
 		};//activeThreadProcess
 
-		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, double lengthOfFile) throws Exception{
+		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, long lengthOfFile) throws Exception{
 			String message = "";
 	
 			if(statusCode == OK){

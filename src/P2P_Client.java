@@ -245,8 +245,36 @@ public class P2P_Client {
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
                 output.writeUTF(generateHTTP(file, IP, "close"));
-                String resp = input.readUTF();
-                System.out.println(resp);
+
+                int len = input.readInt();
+                byte resp[] = new byte[len];
+
+                input.readFully(resp);
+                String string = new String(resp);
+                String s = string.substring(0,string.lastIndexOf("\r\n"));
+                System.out.println(s.length());
+                byte str2[] = string.substring(string.lastIndexOf("\r\n")-1).getBytes();
+
+                try(FileOutputStream fos = new FileOutputStream("C:/Users/KC/Desktop/Casey's Folder/fig1.jpeg")){
+                    fos.write(str2);
+                }
+
+
+               /* Scanner scanner = new Scanner(string);
+                
+                int code = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+                if(code == OK){
+                    for(int i = 0;i<3;i++){
+                        scanner.nextLine();
+                    }
+                }*/
+ 
+                //System.out.println(str2);
+
+
+                //long contentLength = Integer.valueOf(scanner.nextLine().split(" ")[1]);
+               // System.out.println(contentLength);  
+
                 socket.close();
             }
             catch(Exception e){
@@ -265,7 +293,7 @@ public class P2P_Client {
 
         public static String generateHTTP(String filename, String hostname, String connectionStatus){
             String http = "";
-            http += "GET /" + filename + ".jpeg HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
+            http += "GET /" + filename + " HTTP/1.1\r\nHost: " + hostname + "\r\nConnection: " + connectionStatus + "\r\nAccept-language: en-us\r\n";
             return http;
         }//generateHTTP
     }
