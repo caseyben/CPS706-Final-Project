@@ -12,6 +12,8 @@ public class P2P_Server{
 	final private static int NOT_FOUND = 404;
 	final private static int HTTP_NOT_SUPPORTED = 505;
 
+	private ArrayList<activeClient> clientList = new ArrayList<activeClient>();
+
 	private static int port = 25565;
 
 	private ServerSocket mainSocket;
@@ -40,6 +42,8 @@ public class P2P_Server{
 				String response = in.readUTF();
 				response = OK + " " + port;
 				out.writeUTF(response);
+
+				clientList.add(new activeClient());
 				connectionSocket.close();
 				}catch(Exception e){
 					System.out.println("SERVER: " + e);
