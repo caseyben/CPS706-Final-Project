@@ -263,7 +263,7 @@ public class P2P_Client {
                     data[i] = resp[i+headerLength];
                 }
                 
-                try(FileOutputStream fos = new FileOutputStream("/")){
+                try(FileOutputStream fos = new FileOutputStream(file)){
                     fos.write(data);
                 }
                 socket.close();
