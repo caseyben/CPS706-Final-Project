@@ -22,7 +22,7 @@ public class P2P_Client {
     private static final int HTTP_NOT_SUPPORTED = 505;
 
     // The number of DHT servers
-    private static final int NUM_DHT_SERVERS = 2;
+    private static final int NUM_DHT_SERVERS = 1;
 
     // The assigned port number
     private static final int DEFAULT_PORT = 25565;
@@ -205,7 +205,7 @@ public class P2P_Client {
          */
         public void query(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
+            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
             String resp = receiveFromDHT().trim();
             int port = receiveP2PPort(resp);
             if(port != 0){
@@ -222,9 +222,9 @@ public class P2P_Client {
          */
         public void insert(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);//id-1
+            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
 
-            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[0].toString());//id-1
+            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());//id-1
 
             System.out.println("File " + file + " successfully inserted into DHT with ID " + id);
             //System.out.println(localRecords.toString());
