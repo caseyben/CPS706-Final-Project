@@ -40,7 +40,8 @@ public class P2P_Server{
 				DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
 				String response = in.readUTF();
-				response = OK + " " + port;
+				int portToPass = seekPort(port);
+				response = OK + " " + portToPass;
 				out.writeUTF(response);
 
 				clientList.add(new activeClient());
@@ -56,9 +57,9 @@ public class P2P_Server{
 		private Thread activeThread;
 		private ServerSocket activeSocket;
 
-		public activeClient(){
+		public activeClient(int activePort){
 			try{
-				activeSocket = new ServerSocket(port);
+				activeSocket = new ServerSocket(activePort);
 				activeThread = new Thread(activeThreadProcess);
 				activeThread.start();
 			}catch(Exception e){
@@ -150,6 +151,21 @@ public class P2P_Server{
 			return dateFormat.format(date) + " GMT";
 		}//generateDate
 	}//activeClient
+
+	public int seekPort(int basePort){
+		boolean portNotFound = true;
+
+		while(portNotFound){
+			try{
+				ServerSocket attempt = new Socket(basePort);
+				portNotFound = false;
+			}catch (Exception e){
+				basePort++;
+			}//try
+		}//while
+
+		return basePort;
+	}//seekPort
 
 }//P2P_Server
 //HTTP Request
