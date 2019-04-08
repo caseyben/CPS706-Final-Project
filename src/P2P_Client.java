@@ -169,7 +169,7 @@ public class P2P_Client {
                 String resp = receiveFromDHT();
                 //System.out.println(resp);
                 fillDHTPool(resp);
-                System.out.println("Client successfully initiated.");
+                System.out.println("Client successfully initiated. Type \"help\" for commands.");
                 //System.out.println(DHTPool.toString());
             }
             catch(Exception e){
