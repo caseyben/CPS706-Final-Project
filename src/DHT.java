@@ -17,7 +17,7 @@ public class DHT {
     private static String SUCCESSOR_IP = "";
     private static int SUCCESSOR_PORT = 0;
     private static DatagramSocket UDP_SOCKET;
-    private static int UDP_PORT = 25565; //TODO Change to another port
+    private static int UDP_PORT = 20440; //TODO Change to another port 20440-20449
     static {
         try {
             UDP_SOCKET = new DatagramSocket(UDP_PORT); //Static?
@@ -119,7 +119,7 @@ public class DHT {
      */
     private static void TCPClient(String content, String UDP_returnAddress, int UDP_returnPort) throws IOException {
         //Establish Socket
-        Socket TCP_clientSocket = new Socket("192.168.0.151", SUCCESSOR_PORT); //TODO change to DHT_SUCCESSOR_IP
+        Socket TCP_clientSocket = new Socket(SUCCESSOR_IP, SUCCESSOR_PORT); //TODO change to DHT_SUCCESSOR_IP
         System.out.println("TCP_Client on port: " + SUCCESSOR_PORT);
 
         String[] TCP_sendArray = content.split("~");
@@ -173,7 +173,7 @@ public class DHT {
                      TCPClient(TCP_receiveArray[0] + DHT_IP_ADDRESS + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                  } else {
                      String[] IPArray = TCP_receiveMessageArray[1].split("\\?"); //split records to count if enough DHT_IPs collected to return
-                     if(IPArray.length == 1){ //TODO change to 3 //done collecting, return records to P2P_Client
+                     if(IPArray.length == 3){ //TODO change to 3(1) //done collecting, return records to P2P_Client
                          UDPClient(TCP_receiveMessageArray[1], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      } else { //add record and forward
                          TCP_receiveArray[0] += DHT_IP_ADDRESS + ":" + DHT_PORT + "?";
@@ -248,8 +248,8 @@ public class DHT {
             out += record + "?";
         }
 
-        System.out.println("Completed removing records for client at: " + UDP_returnAddress + ":" + UDP_returnPort);
-        //TCPClient("EXIT~" + out, UDP_returnAddress, UDP_returnPort); //TODO uncomment for real test
+        //System.out.println("Completed removing records for client at: " + UDP_returnAddress + ":" + UDP_returnPort); //TODO remove println
+        TCPClient("EXIT~" + out, UDP_returnAddress, UDP_returnPort); //TODO uncomment for real test
     }
 
     /**
@@ -260,8 +260,8 @@ public class DHT {
      * @throws IOException if an I/O error occurs
      */
     private static void returnIPs(String UDP_returnAddress, int UDP_returnPort) throws IOException {
-        //TCPClient("GET_IP~", UDP_returnAddress, UDP_returnPort); //add GET_IP~ header to content, then forward to successor DHT //TODO change when real test
-        UDPClient("192.168.2.1:1111?192.168.2.2:2222?192.168.2.3:3333", UDP_returnAddress, UDP_returnPort); //for single DHT testing purposes
+        TCPClient("GET_IP~", UDP_returnAddress, UDP_returnPort); //add GET_IP~ header to content, then forward to successor DHT //TODO change when real test
+        //UDPClient("192.168.2.1:1111?192.168.2.2:2222?192.168.2.3:3333", UDP_returnAddress, UDP_returnPort); //for single DHT testing purposes
     }
 
     //TODO Error checking
