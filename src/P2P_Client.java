@@ -49,7 +49,7 @@ public class P2P_Client {
          * Override of run method for Runnable class
          */
         public void run(){
-            Client client = new Client(initDHTIP, initDHTPort);//("135.0.211.153",25565);//(initDHTIP, initDHTPort); //135.0.211.153 25565
+            Client client = new Client(initDHTIP, initDHTPort);
             P2P_Server server = new P2P_Server();
             Scanner scanner = new Scanner(System.in);
             String[] input;
@@ -58,8 +58,6 @@ public class P2P_Client {
                 input = scanner.nextLine().split(" ");
                 if(input[0].equalsIgnoreCase("query") && input.length>1){
                     String file = input[1];
-                   // System.out.print("Enter file name: ");
-                    //String file = scanner.next();
                     try{
                         client.query(file);
                     }
@@ -68,8 +66,6 @@ public class P2P_Client {
                     }
                 }
                 else if(input[0].equalsIgnoreCase("insert") && input.length>1){
-                    //System.out.print("Enter file name: ");
-                    //String fileName = scanner.next();
                     String fileName = input[1];
                     File file = new File(fileName);
                     if(file.exists()){
@@ -167,10 +163,8 @@ public class P2P_Client {
                 UDPSocket = new DatagramSocket();
                 sendToDHT("GET_IP", DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
                 String resp = receiveFromDHT();
-                //System.out.println(resp);
                 fillDHTPool(resp);
                 System.out.println("Client successfully initiated. Type \"help\" for commands.");
-                //System.out.println(DHTPool.toString());
             }
             catch(Exception e){
                 System.out.println("Client could not be initiated.");
@@ -232,11 +226,6 @@ public class P2P_Client {
             else{
                 System.out.println(resp);
             }
-
-
-            //System.out.println(localRecords.toString());
-            //String resp = receiveFromDHT().trim();
-            //System.out.println(resp);
         }
 
         /**
@@ -360,19 +349,3 @@ public class P2P_Client {
         }
     }
 }
-
-//HTTP Request
-
-//GET /filename.txt HTTP/1.1\r\n
-//Host: hostname\r\n
-//Connection: status\r\n
-//Accept-language: en-us\r\n
-
-//HTTP Response
-
-//HTTP/1.1 StatusCode\r\n
-//Connection: status\r\n
-//Date: currentDate\r\n
-//Last-Modified: last file modified\r\n
-//Content-Length: length\r\n
-//Content-Type: image/jpeg\r\n
