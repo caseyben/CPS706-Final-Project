@@ -21,7 +21,7 @@ public class P2P_Server{
 	//Status Code for 505 HTTP Version Not Supported Response
 	final private static int HTTP_NOT_SUPPORTED = 505;
 
-	private ArrayList<activeClient> clientList = new ArrayList<activeClient>();
+	private ArrayList<activeClient> clientList = new ArrayList<>();
 
 	//Default port to open P2P_Server server sockets on
 	final private static int DEFAULT_PORT = 25565;
@@ -48,7 +48,7 @@ public class P2P_Server{
 	/**
 	 * Static thread that runs whenever a client is instantiated
 	 */
-	Runnable mainThreadProcess = new Runnable (){
+	private Runnable mainThreadProcess = new Runnable (){
 		/**
 		 * Override of run method for Runnable class
 		 */
@@ -84,7 +84,7 @@ public class P2P_Server{
 		 * Constructor for activeClient class
 		 * @param activePort port to open socket on for communication between clients
 		 */
-		public activeClient(int activePort){
+		private activeClient(int activePort){
 			try{
 				activeSocket = new ServerSocket(activePort);
 				activeThread = new Thread(activeThreadProcess);
@@ -102,7 +102,6 @@ public class P2P_Server{
 			public void run(){
 				try{
 					String requestCode, filename, connection, responseString;
-					int fileLength;
 					Socket socket = activeSocket.accept();
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					String current = in.readUTF();
@@ -161,7 +160,7 @@ public class P2P_Server{
 		 * @param lastModifiedDate Date that file to send was last modified
 		 * @param lengthOfFile Length of file in long
 		 */
-		public String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, long lengthOfFile) throws Exception{
+		private String generateHTTPResponse(int statusCode, String connectionStatus, String date, String lastModifiedDate, long lengthOfFile){
 			String message = "";
 	
 			if(statusCode == OK){
@@ -183,7 +182,7 @@ public class P2P_Server{
 		 * If file object is not null, generate the last modified date of the file. Else, generate the current date on local machine.
 		 * @param file file to generate last modified date
 		 */
-		public String generateDate(File file) throws Exception{
+		private String generateDate(File file){
 			Date date;
 			if(file != null){
 				date = new Date(file.lastModified());
@@ -200,7 +199,7 @@ public class P2P_Server{
 	 * Finds an available port to open new Socket for client-client connection.
 	 * @param basePort the port to increment when seeking an available port
 	 */
-	public int seekPort(int basePort){
+	private int seekPort(int basePort){
 		boolean portNotFound = true;
 
 		while(portNotFound){
