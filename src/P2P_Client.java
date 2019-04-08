@@ -321,7 +321,7 @@ public class P2P_Client {
                 socket.close();
             }
             catch(Exception e){
-                System.out.println("CLIENT: " + e);
+                System.out.println(NOT_FOUND + " Error: File not found.");
             }
         }
 
