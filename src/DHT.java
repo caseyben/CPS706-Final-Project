@@ -57,6 +57,7 @@ public class DHT {
         DatagramPacket sendPacket = new DatagramPacket(UDP_sendData, UDP_sendData.length, UDP_returnIPAddress, UDP_returnPort);
 
         UDP_SOCKET.send(sendPacket);
+        System.out.println("Sent UDP packet containing: \"" + message + "\" to P2P_Client @ " + UDP_returnAddress + ":" + UDP_returnPort);
     }
 
     /**
@@ -64,7 +65,7 @@ public class DHT {
      * @throws IOException if an I/O error occurs
      */
     private static void UDPServer() throws IOException { //UDP from Client --> Server
-        System.out.println("UDP_Server on port: " + UDP_PORT);
+        System.out.println("UDP_Server running on port: " + UDP_PORT);
 
         byte[] UDP_receiveDataBuffer = new byte[4096];
         //byte[] UDP_returnDataBuffer = new byte[4096];
@@ -74,11 +75,11 @@ public class DHT {
             DatagramPacket UDP_receivePacket = new DatagramPacket(UDP_receiveDataBuffer, UDP_receiveDataBuffer.length);
             UDP_SOCKET.receive(UDP_receivePacket);
             String UDP_receiveString = new String(UDP_receivePacket.getData(), 0, UDP_receivePacket.getLength());
-            System.out.println(UDP_receiveString);
 
             //Out
             InetAddress UDP_returnAddress = UDP_receivePacket.getAddress();
             int UDP_returnPort = UDP_receivePacket.getPort();
+            System.out.println("Received UDP packet containing: \"" + UDP_receiveString + "\" from P2P_Client @ " + UDP_returnAddress + ":" + UDP_returnPort);
 
             //Parsing data
             String[] UDP_receiveArray = UDP_receiveString.split("~");
@@ -147,7 +148,7 @@ public class DHT {
     private static void TCPServer() throws IOException {
         //Establish Socket
         ServerSocket TCP_serverSocket = new ServerSocket(DHT_PORT);
-        System.out.println("TCP_Server on port: " + DHT_PORT);
+        System.out.println("TCP_Server running on port: " + DHT_PORT);
 
          while(true){
              //Establish Socket
@@ -198,6 +199,7 @@ public class DHT {
      */
     private static void insert(String content, String IPAddress){
         theTable.put(content, IPAddress);
+        System.out.println("Added record (K, V): (" + content + ", " + IPAddress + ")");
     }
 
     /**
@@ -232,11 +234,13 @@ public class DHT {
         for(int recordNum = 0; recordNum < records.size(); recordNum++){ //split within records
             String[] record = records.get(recordNum).split(":");
             String fileName = record[0];
+            String yourIP = record[2];
 
             if(theTable.containsKey(fileName)){
                 theTable.remove(fileName);
                 records.remove(recordNum);
                 recordNum--;
+                System.out.println("Removed record (K, V): (" + fileName + ", " + yourIP + ")");
             }
         }
 
@@ -244,7 +248,8 @@ public class DHT {
             out += record + "?";
         }
 
-        TCPClient("EXIT~" + out, UDP_returnAddress, UDP_returnPort);
+        System.out.println("Completed removing records for client at: " + UDP_returnAddress + ":" + UDP_returnPort);
+        //TCPClient("EXIT~" + out, UDP_returnAddress, UDP_returnPort); //TODO uncomment for real test
     }
 
     /**
@@ -255,7 +260,7 @@ public class DHT {
      * @throws IOException if an I/O error occurs
      */
     private static void returnIPs(String UDP_returnAddress, int UDP_returnPort) throws IOException {
-        //TCPClient("GET_IP~", UDP_returnAddress, UDP_returnPort); //add GET_IP~ header to content, then forward to successor DHT
+        //TCPClient("GET_IP~", UDP_returnAddress, UDP_returnPort); //add GET_IP~ header to content, then forward to successor DHT //TODO change when real test
         UDPClient("192.168.2.1:1111?192.168.2.2:2222?192.168.2.3:3333", UDP_returnAddress, UDP_returnPort); //for single DHT testing purposes
     }
 
