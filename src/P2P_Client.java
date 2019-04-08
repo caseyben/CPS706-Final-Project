@@ -22,10 +22,10 @@ public class P2P_Client {
     private static final int HTTP_NOT_SUPPORTED = 505;
 
     // The number of DHT servers
-    private static final int NUM_DHT_SERVERS = 1;
+    private static final int NUM_DHT_SERVERS = 4;
 
     // The assigned port number
-    private static final int DEFAULT_PORT = 25565;
+    private static final int DEFAULT_PORT = 20440;
 
     // The IP of the initial DHT connection
     private static String initDHTIP;
@@ -224,9 +224,16 @@ public class P2P_Client {
             int id = hashKey(file);
             sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
 
-            localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());//id-1
+            String resp = receiveFromDHT().trim();
+            if(resp.contains("Successfully")){
+                localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());//id-1
+                System.out.println("File " + file + " successfully inserted into DHT with ID " + id);
+            }
+            else{
+                System.out.println(resp);
+            }
 
-            System.out.println("File " + file + " successfully inserted into DHT with ID " + id);
+
             //System.out.println(localRecords.toString());
             //String resp = receiveFromDHT().trim();
             //System.out.println(resp);
