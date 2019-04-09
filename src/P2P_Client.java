@@ -288,7 +288,7 @@ public class P2P_Client {
                 Scanner scanner = new Scanner(responseString);
                 int status = Integer.valueOf(scanner.nextLine().split(" ")[1]);
                 if(status==OK){
-                    System.out.println(OK + " Success: HTTP response received.");
+                    System.out.println(OK + " OK: HTTP response received.");
                     while(scanner.hasNextLine()){
                         String line = scanner.nextLine();
                         if(line.contains("Content-Length")) {
