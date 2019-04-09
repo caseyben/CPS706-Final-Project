@@ -65,9 +65,7 @@ public class P2P_Server {
                int portToPass = seekPort(DEFAULT_PORT + 1);
 
                response = OK + " " + portToPass;
-			   System.out.println(response);
                out.writeUTF(response);
-			   System.out.println("sent");
 
                clientList.add(new activeClient(portToPass));
                connectionSocket.close();
