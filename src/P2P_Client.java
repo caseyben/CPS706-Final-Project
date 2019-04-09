@@ -253,8 +253,9 @@ public class P2P_Client {
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                 
                 output.writeUTF("OPEN_CONNECTION");
+
                 String resp[] = input.readUTF().split(" ");
-                
+
                 socket.close();
 
                 if(Integer.valueOf(resp[0])==OK){
@@ -274,7 +275,9 @@ public class P2P_Client {
          */
         private static void exchangeHTTP(String IP, int port, String file){
             try{
+
                 Socket socket = new Socket(IP, port);
+
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 

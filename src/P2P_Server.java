@@ -24,7 +24,7 @@ public class P2P_Server {
    private ArrayList<activeClient> clientList = new ArrayList<>();
 
    // Default port to open P2P_Server server sockets on
-   final private static int DEFAULT_PORT = 25565;
+   final private static int DEFAULT_PORT = 20440;
 
    // Instance variables
    private ServerSocket mainSocket;
@@ -35,6 +35,7 @@ public class P2P_Server {
     */
    public P2P_Server() {
       try {
+
          mainSocket = new ServerSocket(DEFAULT_PORT);
          mainThread = new Thread(mainThreadProcess);
          mainThread.start();
@@ -55,11 +56,14 @@ public class P2P_Server {
          while (true) {
             try {
                Socket connectionSocket = mainSocket.accept();
+
                DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
                DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
 
                String response = in.readUTF();
+
                int portToPass = seekPort(DEFAULT_PORT + 1);
+
                response = OK + " " + portToPass;
                out.writeUTF(response);
 
@@ -216,7 +220,7 @@ public class P2P_Server {
 
       // Check if Socket was successfully created on basePort or if number of ports
       // attempted has exceeded allowance
-      while (portNotFound || portsAttempted != (8 - clientList.size())) {
+      while (portNotFound){
          try {
             ServerSocket attempt = new ServerSocket(basePort);
             portNotFound = false;
@@ -230,6 +234,7 @@ public class P2P_Server {
 
       if (portsAttempted == (8 - clientList.size())) {
          System.out.println("No currently available ports.");
+		 return 0;
       } // if
 
       return basePort;
