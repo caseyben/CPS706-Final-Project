@@ -88,7 +88,7 @@ public class DHT {
                     returnIPs(UDP_returnAddress.getHostAddress(), UDP_returnPort);
                     break;
                 case "INSERT":
-                    insert(UDP_receiveArray[1], UDP_returnAddress.getHostAddress());
+                    insert(UDP_receiveArray[1], UDP_returnAddress.getHostAddress(), UDP_returnPort);
                     break;
                 case "FIND":
                     retrieve(UDP_receiveArray[1], UDP_returnAddress.getHostAddress(), UDP_returnPort);
@@ -176,7 +176,7 @@ public class DHT {
                      if(IPArray.length == 3){ //TODO change to 3(1) //done collecting, return records to P2P_Client
                          UDPClient(TCP_receiveMessageArray[1], TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      } else { //add record and forward
-                         TCP_receiveArray[0] += DHT_IP_ADDRESS + ":" + DHT_PORT + "?";
+                         //TCP_receiveArray[0] += DHT_IP_ADDRESS + ":" + DHT_PORT + "?";
                          TCPClient(TCP_receiveArray[0] + DHT_IP_ADDRESS + ":" + DHT_PORT + "?", TCP_receiveArray[1], Integer.valueOf(TCP_receiveArray[2].trim()));
                      }
                  }
@@ -197,9 +197,14 @@ public class DHT {
      * @param content key for theTable
      * @param IPAddress value for theTable
      */
-    private static void insert(String content, String IPAddress){
-        theTable.put(content, IPAddress);
-        System.out.println("Added record (K, V): (" + content + ", " + IPAddress + ")");
+    private static void insert(String content, String UDP_returnAddress, int UDP_returnPort) throws IOException {
+		if(theTable.containsKey(content)){
+			UDPClient("File already exists.", UDP_returnAddress, UDP_returnPort);
+		} else {
+			theTable.put(content, UDP_returnAddress);
+			UDPClient("Successfully inserted file.", UDP_returnAddress, UDP_returnPort);
+			System.out.println("Added record (K, V): (" + content + ", " + UDP_returnAddress + ")");
+		}
     }
 
     /**
