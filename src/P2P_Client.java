@@ -199,7 +199,7 @@ public class P2P_Client {
          */
         private void query(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
+            sendToDHT("FIND~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);
             String resp = receiveFromDHT().trim();
             int port = receiveP2PPort(resp);
             if(port != 0){
@@ -216,11 +216,11 @@ public class P2P_Client {
          */
         private void insert(String file) throws Exception{
             int id = hashKey(file);
-            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);//id-1
+            sendToDHT("INSERT~"+file,  DHTPool.keySet().toArray()[id-1].toString(), (int) DHTPool.values().toArray()[id-1]);
 
             String resp = receiveFromDHT().trim();
             if(resp.contains("Successfully")){
-                localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());//id-1
+                localRecords.add(file + ":" + id + ":" + DHTPool.keySet().toArray()[id-1].toString());
                 System.out.println("File " + file + " successfully inserted into DHT with ID " + id);
             }
             else{
@@ -237,6 +237,7 @@ public class P2P_Client {
                 records += localRecord + "?";
             }
             sendToDHT("EXIT~"+records, DHTPool.keySet().toArray()[0].toString(), (int) DHTPool.values().toArray()[0]);
+            System.out.println("Successfully exited.");
             System.exit(0);
         }
     
