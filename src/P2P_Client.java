@@ -252,7 +252,7 @@ public class P2P_Client {
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                 
-                output.writeUTF("Open");
+                output.writeUTF("OPEN_CONNECTION");
                 String resp[] = input.readUTF().split(" ");
                 
                 socket.close();
