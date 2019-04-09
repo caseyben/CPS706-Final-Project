@@ -165,7 +165,6 @@ public class P2P_Client {
                 String resp = receiveFromDHT();
                 fillDHTPool(resp);
                 System.out.println("Client successfully initiated. Type \"help\" for commands.");
-				System.out.println(DHTPool.toString());
             }
             catch(Exception e){
                 System.out.println("Client could not be initiated.");
