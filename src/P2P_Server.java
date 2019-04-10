@@ -41,7 +41,6 @@ public class P2P_Server {
          mainThread.start();
       } catch (Exception e) {
          System.out.println(e);
-         // System.err.println("Port Not Available.");
       } // try
    }// constructor
 
@@ -147,7 +146,6 @@ public class P2P_Server {
                   DataOutputStream dataOutput = new DataOutputStream(socket.getOutputStream());
                   dataOutput.writeInt(byteArray.length);
                   dataOutput.write(byteArray, 0, byteArray.length);
-                  // dataOutput.writeUTF("TEST");
                   socket.close();
                   activeSocket.close();
                } // if
